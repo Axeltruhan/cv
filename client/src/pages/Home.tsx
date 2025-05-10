@@ -148,12 +148,23 @@ const Home = () => {
       return;
     }
     
-    try {
+    // Controlla che ci siano dati da includere nel CV
+    if (!personalInfo.firstName) {
       toast({
-        title: "Preparazione",
-        description: "Generazione del PDF in corso...",
+        title: "Dati incompleti",
+        description: "Inserisci almeno il tuo nome per generare il CV.",
+        variant: "destructive"
       });
-      
+      return;
+    }
+    
+    // Toast per indicare che la generazione è in corso
+    const loadingToast = toast({
+      title: "Preparazione",
+      description: "Generazione del PDF in corso...",
+    });
+    
+    try {
       // Dimensioni della pagina A4
       const pageWidth = 210; // mm
       const pageHeight = 297; // mm
@@ -187,7 +198,7 @@ const Home = () => {
       
       // Prendiamo le sezioni principali, che corrispondono ai vari blocchi del CV
       const header = cvElement.querySelector('.flex.flex-col.items-start.mb-6') as HTMLElement;
-      const sections = Array.from(cvElement.querySelectorAll('.mb-6')).filter(
+      const sections = Array.from(cvElement.querySelectorAll('.mb-4')).filter(
         (section) => section !== header
       ) as HTMLElement[];
       
@@ -204,101 +215,141 @@ const Home = () => {
       
       // Funzione per generare una pagina
       const renderPage = async (elements: HTMLElement[], isFirstPage: boolean = false) => {
-        // Pulisci il contenitore
-        pdfContent.innerHTML = '';
-        
-        // Aggiungi gli elementi alla pagina
-        elements.forEach(el => {
-          const clone = el.cloneNode(true) as HTMLElement;
-          pdfContent.appendChild(clone);
-        });
-        
-        // Genera il canvas per la pagina
-        const canvas = await html2canvas(pdfContent, {
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: "#ffffff",
-        });
-        
-        // Se non è la prima pagina, aggiungi una nuova pagina
-        if (!isFirstPage) {
-          pdf.addPage();
+        try {
+          // Pulisci il contenitore
+          pdfContent.innerHTML = '';
+          
+          if (!elements || elements.length === 0) {
+            console.warn('No elements to render for page');
+            return;
+          }
+          
+          // Aggiungi gli elementi alla pagina
+          elements.forEach(el => {
+            if (el) {
+              const clone = el.cloneNode(true) as HTMLElement;
+              pdfContent.appendChild(clone);
+            }
+          });
+          
+          // Assicurati che il contenuto abbia dimensioni corrette
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+          // Genera il canvas per la pagina
+          const canvas = await html2canvas(pdfContent, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: "#ffffff",
+            logging: false,
+            onclone: (doc) => {
+              // Assicurati che le immagini siano completamente caricate
+              const images = doc.getElementsByTagName('img');
+              for (let i = 0; i < images.length; i++) {
+                images[i].setAttribute('crossorigin', 'anonymous');
+              }
+            }
+          });
+          
+          // Se non è la prima pagina, aggiungi una nuova pagina
+          if (!isFirstPage) {
+            pdf.addPage();
+          }
+          
+          // Converti il canvas in immagine
+          const imgData = canvas.toDataURL('image/jpeg', 0.92);
+          
+          // Calcola le dimensioni dell'immagine mantenendo le proporzioni
+          const imgWidth = pageWidth - (marginX * 2);
+          const imgHeight = canvas.height * imgWidth / canvas.width;
+          
+          // Aggiungi l'immagine al PDF
+          pdf.addImage(imgData, 'JPEG', marginX, marginY, imgWidth, imgHeight);
+        } catch (err) {
+          console.error('Error rendering page:', err);
+          throw new Error('Errore durante la generazione della pagina');
         }
-        
-        // Converti il canvas in immagine
-        const imgData = canvas.toDataURL('image/jpeg', 0.95);
-        
-        // Calcola le dimensioni dell'immagine mantenendo le proporzioni
-        const imgWidth = pageWidth - (marginX * 2);
-        const imgHeight = canvas.height * imgWidth / canvas.width;
-        
-        // Aggiungi l'immagine al PDF
-        pdf.addImage(imgData, 'JPEG', marginX, marginY, imgWidth, imgHeight);
       };
       
       // Raggruppare le sezioni in pagine ottimizzate
       const generateOptimizedPages = async () => {
-        // Prima pagina: sempre l'intestazione
-        const firstPageElements = [header];
-        let currentPage = [];
-        let currentPageHeight = header.offsetHeight;
-        const maxPageHeight = 275; // Altezza massima per pagina in mm (A4 - margini)
-        
-        // Distribuisci le sezioni nelle pagine
-        for (const section of sections) {
-          const sectionHeight = section.offsetHeight;
-          
-          // Se la sezione è troppo grande per una pagina, mettila da sola
-          if (sectionHeight > maxPageHeight) {
-            // Se ci sono elementi nella pagina corrente, finalizza la pagina
-            if (currentPage.length > 0) {
-              firstPageElements.push(...currentPage);
-              await renderPage(firstPageElements, true);
-              currentPage = [];
-              firstPageElements.length = 0; // Svuota l'array
-            } else if (firstPageElements.length > 1) {
-              await renderPage(firstPageElements, true);
-              firstPageElements.length = 0; // Svuota l'array
-            }
-            
-            // Metti la sezione grande in una pagina dedicata
-            await renderPage([section], firstPageElements.length === 0);
-            currentPageHeight = 0;
-            continue;
+        try {
+          // Verifica che tutti gli elementi necessari siano presenti
+          if (!header || !Array.isArray(sections) || sections.length === 0) {
+            console.warn("Elementi CV mancanti o non validi");
+            throw new Error("Contenuto CV non valido");
           }
           
-          // Se aggiungere questa sezione supera l'altezza della pagina
-          if (currentPageHeight + sectionHeight > maxPageHeight) {
-            // Finalizza la pagina corrente
+          // Prima pagina: sempre l'intestazione
+          const firstPageElements: HTMLElement[] = [header];
+          let currentPage: HTMLElement[] = [];
+          let currentPageHeight = header.offsetHeight || 0;
+          const maxPageHeight = 275; // Altezza massima per pagina in mm (A4 - margini)
+          
+          console.log(`Inizio generazione PDF con ${sections.length} sezioni`);
+          
+          // Distribuisci le sezioni nelle pagine
+          for (const section of sections) {
+            if (!section) continue;
+            
+            const sectionHeight = section.offsetHeight || 0;
+            
+            // Se la sezione è troppo grande per una pagina, mettila da sola
+            if (sectionHeight > maxPageHeight) {
+              // Se ci sono elementi nella pagina corrente, finalizza la pagina
+              if (currentPage.length > 0) {
+                firstPageElements.push(...currentPage);
+                await renderPage(firstPageElements, true);
+                currentPage = [];
+                firstPageElements.length = 0; // Svuota l'array
+              } else if (firstPageElements.length > 1) {
+                await renderPage(firstPageElements, true);
+                firstPageElements.length = 0; // Svuota l'array
+              }
+              
+              // Metti la sezione grande in una pagina dedicata
+              await renderPage([section], firstPageElements.length === 0);
+              currentPageHeight = 0;
+              continue;
+            }
+            
+            // Se aggiungere questa sezione supera l'altezza della pagina
+            if (currentPageHeight + sectionHeight > maxPageHeight) {
+              // Finalizza la pagina corrente
+              if (firstPageElements.length > 0) {
+                firstPageElements.push(...currentPage);
+                await renderPage(firstPageElements, true);
+                firstPageElements.length = 0;
+              } else if (currentPage.length > 0) {
+                await renderPage(currentPage, false);
+              }
+              
+              // Inizia una nuova pagina con questa sezione
+              currentPage = [section];
+              currentPageHeight = sectionHeight;
+            } else {
+              // Aggiungi la sezione alla pagina corrente
+              currentPage.push(section);
+              currentPageHeight += sectionHeight;
+            }
+          }
+          
+          // Finalizza l'ultima pagina se ci sono elementi rimanenti
+          if (currentPage.length > 0) {
             if (firstPageElements.length > 0) {
               firstPageElements.push(...currentPage);
               await renderPage(firstPageElements, true);
-              firstPageElements.length = 0;
             } else {
               await renderPage(currentPage, false);
             }
-            
-            // Inizia una nuova pagina con questa sezione
-            currentPage = [section];
-            currentPageHeight = sectionHeight;
-          } else {
-            // Aggiungi la sezione alla pagina corrente
-            currentPage.push(section);
-            currentPageHeight += sectionHeight;
-          }
-        }
-        
-        // Finalizza l'ultima pagina se ci sono elementi rimanenti
-        if (currentPage.length > 0) {
-          if (firstPageElements.length > 0) {
-            firstPageElements.push(...currentPage);
+          } else if (firstPageElements.length > 0) {
             await renderPage(firstPageElements, true);
-          } else {
-            await renderPage(currentPage, false);
           }
-        } else if (firstPageElements.length > 0) {
-          await renderPage(firstPageElements, true);
+          
+          console.log("Generazione PDF completata con successo");
+        } catch (err) {
+          console.error("Errore durante la generazione delle pagine:", err);
+          throw new Error("Errore durante la generazione delle pagine");
         }
       };
       
