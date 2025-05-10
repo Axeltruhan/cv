@@ -8,12 +8,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Generate description for a job title
   app.get("/api/generate-description", async (req, res) => {
     const title = req.query.title as string;
+    const isPersonal = req.query.isPersonal === 'true';
     
-    if (!title) {
-      return res.status(400).json({ message: "Title is required" });
+    if (!title && !isPersonal) {
+      return res.status(400).json({ message: "Title is required unless requesting personal description" });
     }
     
-    const description = generateDescription(title);
+    const description = isPersonal 
+      ? generatePersonalDescription() 
+      : generateJobDescription(title);
+      
     res.json({ description });
   });
 
@@ -40,7 +44,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   return httpServer;
 }
 
-function generateDescription(title: string): string {
+function generateJobDescription(title: string): string {
   const lowerTitle = title.toLowerCase();
   
   // Sviluppatore/Programmatore
@@ -48,7 +52,10 @@ function generateDescription(title: string): string {
     const descriptions = [
       'Sviluppatore esperto con competenze avanzate nella creazione di applicazioni web moderne. Specializzato nella risoluzione di problemi complessi e nell\'ottimizzazione delle performance. Focalizzato alla consegna di codice pulito, ben documentato e facilmente manutenibile.',
       'Programmatore con solide competenze tecniche e passione per lo sviluppo di soluzioni innovative. Esperienza nella realizzazione di applicazioni scalabili e nella gestione di progetti complessi. Capacità di lavorare sia in autonomia che in team.',
-      'Sviluppatore software con esperienza nella progettazione e implementazione di sistemi backend e frontend. Abile nella risoluzione di bug e nell\'ottimizzazione delle prestazioni. Attitudine all\'apprendimento continuo e all\'adozione di nuove tecnologie.'
+      'Sviluppatore software con esperienza nella progettazione e implementazione di sistemi backend e frontend. Abile nella risoluzione di bug e nell\'ottimizzazione delle prestazioni. Attitudine all\'apprendimento continuo e all\'adozione di nuove tecnologie.',
+      'Developer con esperienza nella creazione di applicazioni responsive e cross-platform. Competenze nella gestione del ciclo di vita del software e nell\'utilizzo di metodologie agili. Capacità di comunicare efficacemente con team multidisciplinari.',
+      'Sviluppatore full-stack con conoscenze approfondite di frontend e backend. Esperienza nella progettazione di API RESTful e nell\'integrazione di servizi di terze parti. Attenzione alla sicurezza e alla protezione dei dati degli utenti.',
+      'Programmatore specializzato nell\'ottimizzazione delle performance e nel debugging avanzato. Esperienza nell\'implementazione di algoritmi complessi e nella gestione di grandi volumi di dati. Capacità di lavorare in contesti ad alta pressione rispettando le scadenze.'
     ];
     return descriptions[Math.floor(Math.random() * descriptions.length)];
   } 
@@ -115,4 +122,30 @@ function generateDescription(title: string): string {
     ];
     return descriptions[Math.floor(Math.random() * descriptions.length)];
   }
+}
+
+function generatePersonalDescription(): string {
+  const descriptions = [
+    'Persona dinamica e intraprendente con una forte attitudine al problem solving. Appassionato/a di apprendimento continuo e alla ricerca di nuove sfide. Grande capacità di adattamento e predisposizione al lavoro di squadra.',
+    
+    'Individuо creativo e curioso con una forte propensione all\'innovazione. Ottima capacità di comunicazione e di relazione interpersonale. Determinato/a nel raggiungere gli obiettivi prefissati con entusiasmo e dedizione.',
+    
+    'Persona empatica e attenta ai dettagli, con spiccate capacità organizzative e di gestione del tempo. Appassionato/a di crescita personale e professionale, sempre alla ricerca di nuove opportunità di apprendimento.',
+    
+    'Carattere resiliente e flessibile, capace di adattarsi rapidamente ai cambiamenti. Grande capacità di ascolto e comprensione delle esigenze altrui. Motivato/a dal desiderio di miglioramento continuo e di eccellenza.',
+    
+    'Persona equilibrata e riflessiva, con un approccio analitico ai problemi e una naturale propensione alla pianificazione. Appassionato/a di condivisione delle conoscenze e di collaborazione in team multidisciplinari.',
+    
+    'Individuo affidabile e puntuale, con un forte senso di responsabilità e di etica professionale. Grande entusiasmo per le sfide intellettuali e disponibilità ad apprendere continuamente.',
+    
+    'Persona socievole e comunicativa, con una naturale predisposizione al networking e alla costruzione di relazioni durature. Appassionato/a di cultura e di scambio interculturale.',
+    
+    'Individuo determinato e pragmatico, orientato ai risultati e alla qualità del lavoro. Capace di mantenere la calma sotto pressione e di trovare soluzioni creative a problemi complessi.',
+    
+    'Persona versatile con interessi diversificati, aperta alle novità e alle prospettive diverse. Grande capacità di adattamento a contesti multiculturali e a team eterogenei.',
+    
+    'Carattere positivo e propositivo, con una naturale attitudine alla leadership e al coordinamento di gruppi. Fortemente motivato/a dalla crescita personale e dal raggiungimento dell\'eccellenza.'
+  ];
+  
+  return descriptions[Math.floor(Math.random() * descriptions.length)];
 }

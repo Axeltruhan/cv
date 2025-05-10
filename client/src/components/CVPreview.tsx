@@ -43,9 +43,6 @@ const CVPreview = ({ personalInfo, experiences, education, skills }: CVPreviewPr
                   <h1 className="text-2xl font-bold">
                     {personalInfo.firstName || 'Nome'} {personalInfo.lastName || 'Cognome'}
                   </h1>
-                  <p className="text-sm text-gray-600 mb-4">
-                    {personalInfo.description || 'Su di me'}
-                  </p>
                   
                   <div className="flex flex-col gap-y-1">
                     {personalInfo.email && (
@@ -74,6 +71,16 @@ const CVPreview = ({ personalInfo, experiences, education, skills }: CVPreviewPr
                       </div>
                     )}
                   </div>
+                  
+                  {/* Su di me section */}
+                  {personalInfo.description && (
+                    <div className="mt-4 border-t pt-4 border-gray-200">
+                      <h2 className="text-base font-semibold mb-2 text-gray-700">Su di me</h2>
+                      <p className="text-sm text-gray-600">
+                        {personalInfo.description}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
