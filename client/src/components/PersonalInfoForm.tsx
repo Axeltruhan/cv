@@ -57,8 +57,20 @@ const PersonalInfoForm = ({ personalInfo, setPersonalInfo }: PersonalInfoFormPro
     setIsGenerating(true);
     
     try {
-      // Usiamo un titolo standard per generare la descrizione
-      const response = await apiRequest('get', `/api/generate-description?title=professionista`, undefined);
+      // Generiamo una descrizione basata sulla professione scelta casualmente
+      const professioni = [
+        'sviluppatore', 
+        'designer', 
+        'marketing specialist', 
+        'manager', 
+        'insegnante', 
+        'medico', 
+        'avvocato'
+      ];
+      
+      const professione = professioni[Math.floor(Math.random() * professioni.length)];
+      
+      const response = await apiRequest('get', `/api/generate-description?title=${encodeURIComponent(professione)}`, undefined);
       const data = await response.json();
       
       setPersonalInfo({ ...personalInfo, description: data.description });
