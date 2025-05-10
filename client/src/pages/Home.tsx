@@ -196,11 +196,25 @@ const Home = () => {
       cvElement.style.height = "auto";
       cvElement.style.padding = "8mm";
       
-      // Prendiamo le sezioni principali, che corrispondono ai vari blocchi del CV
-      const header = cvElement.querySelector('.flex.flex-col.items-start.mb-6') as HTMLElement;
-      const sections = Array.from(cvElement.querySelectorAll('.mb-4')).filter(
-        (section) => section !== header
-      ) as HTMLElement[];
+      // Prendiamo le sezioni principali del CV
+      // Il contenitore interno del CV
+      const cvContainer = cvElement.querySelector('.p-6.border.rounded-md.bg-white') as HTMLElement;
+      
+      if (!cvContainer) {
+        console.error("Errore: Impossibile trovare il contenitore del CV");
+        throw new Error("Struttura del CV non valida");
+      }
+      
+      // Trova l'intestazione (il primo elemento)
+      const header = cvContainer.children[0] as HTMLElement;
+      
+      // Prendi tutte le altre sezioni (i figli successivi del contenitore)
+      const sections = [] as HTMLElement[];
+      for (let i = 1; i < cvContainer.children.length; i++) {
+        sections.push(cvContainer.children[i] as HTMLElement);
+      }
+      
+      console.log(`Trovate ${sections.length} sezioni nel CV`);
       
       // Cloniamo il container del PDF per mantenere tutti gli stili
       const pdfContent = document.createElement('div');
@@ -274,10 +288,25 @@ const Home = () => {
       // Raggruppare le sezioni in pagine ottimizzate
       const generateOptimizedPages = async () => {
         try {
+          // Log per debug
+          console.log("Header trovato:", !!header);
+          console.log("Numero di sezioni trovate:", sections.length);
+          
           // Verifica che tutti gli elementi necessari siano presenti
-          if (!header || !Array.isArray(sections) || sections.length === 0) {
-            console.warn("Elementi CV mancanti o non validi");
-            throw new Error("Contenuto CV non valido");
+          if (!header) {
+            console.warn("Header non trovato nel CV");
+            throw new Error("Intestazione CV non trovata");
+          }
+          
+          if (!Array.isArray(sections)) {
+            console.warn("Array di sezioni non valido");
+            throw new Error("Struttura del CV non valida");
+          }
+          
+          if (sections.length === 0) {
+            console.warn("Nessuna sezione trovata nel CV");
+            // Continua comunque con solo l'header
+            console.log("Generazione PDF con solo intestazione")
           }
           
           // Prima pagina: sempre l'intestazione
