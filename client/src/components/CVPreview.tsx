@@ -1,5 +1,5 @@
 import { formatDate } from "@/lib/utils/date-formatter";
-import { PersonalInfo, Experience, Education, Skill } from "@shared/schema";
+import { PersonalInfo, Experience, Education, Skill, Language } from "@shared/schema";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface CVPreviewProps {
@@ -23,7 +23,7 @@ const CVPreview = ({ personalInfo, experiences, education, skills }: CVPreviewPr
       </CardHeader>
       <CardContent>
         <div className="border border-gray-300 rounded-lg overflow-hidden" style={{ maxHeight: "80vh", overflowY: "auto" }}>
-          <div className="bg-gray-100 p-6 relative" id="cv-preview" style={{ width: "100%" }}>
+          <div className="bg-white p-6 relative" id="cv-preview" style={{ width: "100%" }}>
             {/* CV Header */}
             <div className="flex flex-col items-start mb-6 pb-6 border-b border-gray-300">
               <div className="flex flex-row w-full mb-4">
@@ -168,6 +168,61 @@ const CVPreview = ({ personalInfo, experiences, education, skills }: CVPreviewPr
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Languages Section */}
+            {personalInfo.languages && personalInfo.languages.length > 0 && (
+              <div className="mb-6">
+                <h2 className="text-lg font-semibold mb-4 pb-1 border-b border-gray-300 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                  </svg>
+                  Lingue Conosciute
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {personalInfo.languages.map((language) => (
+                    <div key={language.id} className="flex items-center">
+                      <span className="text-sm mr-2 flex-1">{language.name || 'Lingua'}</span>
+                      <div className="flex">
+                        {[1, 2, 3, 4, 5].map((level) => (
+                          <div 
+                            key={level}
+                            className={`w-4 h-4 rounded-full mx-0.5 ${level <= language.level ? 'bg-primary' : 'bg-gray-200'}`}
+                          ></div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Driving Info Section */}
+            {(personalInfo.drivingLicense || personalInfo.hasCar) && (
+              <div className="mb-6">
+                <h2 className="text-lg font-semibold mb-4 pb-1 border-b border-gray-300 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                  </svg>
+                  Informazioni di Mobilità
+                </h2>
+                <div className="space-y-2">
+                  {personalInfo.drivingLicense && (
+                    <div className="flex items-center">
+                      <span className="text-sm text-gray-700 font-medium mr-2">Patente di guida:</span>
+                      <span className="text-sm text-gray-600">{personalInfo.drivingLicense}</span>
+                    </div>
+                  )}
+                  {personalInfo.hasCar && (
+                    <div className="flex items-center">
+                      <span className="text-sm text-gray-700 font-medium mr-2">Automunito:</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
