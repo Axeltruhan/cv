@@ -137,51 +137,13 @@ const Home = () => {
   };
   
   const downloadCV = async () => {
-    const cvElement = document.getElementById('cv-preview');
-    
-    if (!cvElement) {
-      toast({
-        title: "Errore",
-        description: "Impossibile generare il PDF. Elemento CV non trovato.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
     try {
       toast({
         title: "Preparazione",
         description: "Generazione del PDF in corso...",
       });
       
-      // Modifichiamo temporaneamente lo stile dell'elemento per ottenere una pagina completa
-      const originalStyle = {
-        maxHeight: cvElement.style.maxHeight,
-        overflowY: cvElement.style.overflowY,
-        height: cvElement.style.height
-      };
-      
-      // Rimuovi limiti di altezza per la generazione del PDF
-      cvElement.style.maxHeight = "none";
-      cvElement.style.overflowY = "visible";
-      cvElement.style.height = "auto";
-      
-      // Creiamo il canvas con dimensioni complete
-      const canvas = await html2canvas(cvElement, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: "#ffffff",
-        scrollY: 0,
-        windowHeight: cvElement.scrollHeight
-      });
-      
-      // Ripristiniamo lo stile originale
-      cvElement.style.maxHeight = originalStyle.maxHeight;
-      cvElement.style.overflowY = originalStyle.overflowY;
-      cvElement.style.height = originalStyle.height;
-      
-      const imgData = canvas.toDataURL('image/png');
+      // Creiamo un nuovo PDF in formato A4
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -192,68 +154,118 @@ const Home = () => {
       const pageWidth = 210;
       const pageHeight = 297;
       
-      // Calcola le dimensioni proporzionali dell'immagine
-      const imgWidth = pageWidth;
-      const imgHeight = canvas.height * imgWidth / canvas.width;
+      // Suddividiamo il contenuto del CV in sezioni separate
       
-      // Ottieni gli elementi principali del CV per identificare i punti di interruzione
-      const sections = Array.from(cvElement.querySelectorAll('h2.text-lg.font-semibold.mb-4'));
-      const sectionPositions = sections.map(section => {
-        const rect = section.getBoundingClientRect();
-        const cvRect = cvElement.getBoundingClientRect();
-        return (rect.top - cvRect.top) * imgHeight / canvas.height;
-      });
-      
-      // Aggiungi l'inizio e la fine del documento alle posizioni
-      sectionPositions.unshift(0);
-      sectionPositions.push(imgHeight);
-      
-      // Calcola quante pagine saranno necessarie
-      const totalPages = Math.ceil(imgHeight / pageHeight);
-      
-      // Per ogni pagina, trova il miglior punto di interruzione
-      for (let pageNum = 0; pageNum < totalPages; pageNum++) {
-        const pageStart = pageNum * pageHeight;
-        const pageEnd = (pageNum + 1) * pageHeight;
+      // 1. Sezione Informazioni Personali
+      const headerSection = document.querySelector('#cv-preview .flex.flex-col.items-start.mb-6');
+      if (headerSection) {
+        const headerCanvas = await html2canvas(headerSection as HTMLElement, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: "#ffffff",
+        });
         
-        // Trova il punto di interruzione più adatto
-        let bestBreakPoint = pageEnd;
+        const headerImgWidth = pageWidth;
+        const headerImgHeight = headerCanvas.height * headerImgWidth / headerCanvas.width;
+        const headerImgData = headerCanvas.toDataURL('image/png');
         
-        // Cerca la sezione che inizia dopo l'inizio della pagina ma prima della fine
-        // e che è più vicina alla fine della pagina
-        for (let i = 0; i < sectionPositions.length - 1; i++) {
-          const sectionStart = sectionPositions[i];
-          const nextSectionStart = sectionPositions[i + 1];
+        pdf.addImage(headerImgData, 'PNG', 0, 0, headerImgWidth, headerImgHeight);
+        
+        // Posizione verticale corrente
+        let currentY = headerImgHeight + 5; // Aggiungiamo un po' di spazio
+        
+        // 2. Aggiungiamo le altre sezioni una per una
+        const mainSections = Array.from(document.querySelectorAll('#cv-preview > div.mb-6')).filter(
+          section => section !== headerSection
+        );
+        
+        for (const section of mainSections) {
+          const sectionCanvas = await html2canvas(section as HTMLElement, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: "#ffffff",
+          });
           
-          // Se l'inizio della sezione è nella pagina corrente
-          if (sectionStart >= pageStart && sectionStart < pageEnd) {
-            // Se la sezione è troppo grande per stare in una pagina, la mettiamo comunque all'inizio della pagina
-            if (nextSectionStart - sectionStart > pageHeight) {
-              if (sectionStart > pageStart) {
-                bestBreakPoint = sectionStart;
-              }
-            } 
-            // Altrimenti verifichiamo se la sezione può stare interamente nella pagina
-            else if (nextSectionStart <= pageEnd) {
-              // La sezione può stare nella pagina, non facciamo nulla
-            } 
-            // Se la sezione non può stare interamente nella pagina, la spostiamo alla pagina successiva
-            else if (sectionStart > pageStart) {
-              bestBreakPoint = sectionStart;
-            }
+          const sectionImgWidth = pageWidth;
+          const sectionImgHeight = sectionCanvas.height * sectionImgWidth / sectionCanvas.width;
+          const sectionImgData = sectionCanvas.toDataURL('image/png');
+          
+          // Controlla se la sezione può entrare nella pagina corrente
+          if (currentY + sectionImgHeight > pageHeight) {
+            // Se non c'è abbastanza spazio, aggiungi una nuova pagina
+            pdf.addPage();
+            currentY = 0;
           }
+          
+          // Aggiungi la sezione alla pagina corrente
+          pdf.addImage(sectionImgData, 'PNG', 0, currentY, sectionImgWidth, sectionImgHeight);
+          
+          // Aggiorna la posizione verticale
+          currentY += sectionImgHeight + 5; // Aggiungiamo un po' di spazio tra le sezioni
+        }
+      } else {
+        // Fallback nel caso in cui la suddivisione in sezioni non funzioni
+        const cvElement = document.getElementById('cv-preview');
+        
+        if (!cvElement) {
+          toast({
+            title: "Errore",
+            description: "Impossibile generare il PDF. Elemento CV non trovato.",
+            variant: "destructive"
+          });
+          return;
         }
         
-        // Aggiungi la pagina
-        if (pageNum > 0) {
+        // Modifichiamo temporaneamente lo stile dell'elemento per ottenere una pagina completa
+        const originalStyle = {
+          maxHeight: cvElement.style.maxHeight,
+          overflowY: cvElement.style.overflowY,
+          height: cvElement.style.height
+        };
+        
+        // Rimuovi limiti di altezza per la generazione del PDF
+        cvElement.style.maxHeight = "none";
+        cvElement.style.overflowY = "visible";
+        cvElement.style.height = "auto";
+        
+        // Creiamo il canvas con dimensioni complete
+        const canvas = await html2canvas(cvElement, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: "#ffffff",
+          scrollY: 0,
+          windowHeight: cvElement.scrollHeight
+        });
+        
+        // Ripristiniamo lo stile originale
+        cvElement.style.maxHeight = originalStyle.maxHeight;
+        cvElement.style.overflowY = originalStyle.overflowY;
+        cvElement.style.height = originalStyle.height;
+        
+        const imgData = canvas.toDataURL('image/png');
+        
+        // Calcola le dimensioni proporzionali dell'immagine
+        const imgWidth = pageWidth;
+        const imgHeight = canvas.height * imgWidth / canvas.width;
+        
+        // Se l'immagine è più grande della pagina, la suddividiamo in più pagine
+        let heightLeft = imgHeight;
+        let position = 0;
+        let pageNumber = 1;
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, Math.min(imgHeight, pageHeight));
+        heightLeft -= pageHeight;
+        
+        while (heightLeft > 0) {
+          position = -pageHeight * pageNumber;
           pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+          pageNumber++;
         }
-        
-        // Calcola la posizione verticale dell'immagine
-        const yPos = -pageStart;
-        
-        // Aggiungi l'immagine alla pagina
-        pdf.addImage(imgData, 'PNG', 0, yPos, imgWidth, imgHeight);
       }
       
       pdf.save(`CV_${personalInfo.firstName}_${personalInfo.lastName || 'CV'}.pdf`);
