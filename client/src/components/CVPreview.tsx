@@ -25,8 +25,8 @@ const CVPreview = ({ personalInfo, experiences, education, skills }: CVPreviewPr
         <div className="border border-gray-300 rounded-lg overflow-hidden" style={{ maxHeight: "80vh", overflowY: "auto" }}>
           <div className="bg-white p-4 pt-6 relative border border-gray-300 rounded-sm" id="cv-preview" style={{ width: "100%" }}>
             {/* CV Header */}
-            <div className="flex flex-col items-start mb-6 pb-6 border-b border-gray-300">
-              <div className="flex flex-row w-full mb-4">
+            <div className="flex flex-col items-start mb-4 pb-3 border-b border-gray-300">
+              <div className="flex flex-row w-full mb-3">
                 <div className="mr-6">
                   <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                     {personalInfo.photo ? (
@@ -92,8 +92,8 @@ const CVPreview = ({ personalInfo, experiences, education, skills }: CVPreviewPr
             
             {/* Experience Section */}
             {experiences.length > 0 && (
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold mb-4 pb-1 border-b border-gray-300 flex items-center">
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold mb-3 pb-1 border-b border-gray-300 flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
@@ -118,8 +118,8 @@ const CVPreview = ({ personalInfo, experiences, education, skills }: CVPreviewPr
             
             {/* Education Section */}
             {education.length > 0 && (
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold mb-4 pb-1 border-b border-gray-300 flex items-center">
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold mb-3 pb-1 border-b border-gray-300 flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path d="M12 14l9-5-9-5-9 5 9 5z" />
                     <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998a12.078 12.078 0 01.665-6.479L12 14z" />
@@ -146,8 +146,8 @@ const CVPreview = ({ personalInfo, experiences, education, skills }: CVPreviewPr
             
             {/* Skills Section */}
             {skills.length > 0 && (
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold mb-4 pb-1 border-b border-gray-300 flex items-center">
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold mb-3 pb-1 border-b border-gray-300 flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -174,8 +174,8 @@ const CVPreview = ({ personalInfo, experiences, education, skills }: CVPreviewPr
             
             {/* Languages Section */}
             {personalInfo.languages && personalInfo.languages.length > 0 && (
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold mb-4 pb-1 border-b border-gray-300 flex items-center">
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold mb-3 pb-1 border-b border-gray-300 flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
                   </svg>
@@ -196,8 +196,8 @@ const CVPreview = ({ personalInfo, experiences, education, skills }: CVPreviewPr
             
             {/* Driving Info Section */}
             {(personalInfo.drivingLicense || personalInfo.hasCar) && (
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold mb-4 pb-1 border-b border-gray-300 flex items-center">
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold mb-3 pb-1 border-b border-gray-300 flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                   </svg>

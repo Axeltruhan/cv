@@ -159,8 +159,8 @@ const Home = () => {
       const pageHeight = 297; // mm
       
       // Imposta margini e bordi
-      const marginX = 10; // mm
-      const marginY = 10; // mm
+      const marginX = 8; // mm
+      const marginY = 8; // mm
       
       // Crea il PDF usando jsPDF
       const pdf = new jsPDF({
@@ -198,7 +198,8 @@ const Home = () => {
       pdfContent.style.backgroundColor = 'white';
       pdfContent.style.width = `${pageWidth - (marginX * 2)}mm`;
       pdfContent.style.border = '0.5mm solid #ccc';
-      pdfContent.style.padding = '5mm';
+      pdfContent.style.padding = '4mm';
+      pdfContent.style.boxSizing = 'border-box';
       document.body.appendChild(pdfContent);
       
       // Funzione per generare una pagina
@@ -242,7 +243,7 @@ const Home = () => {
         const firstPageElements = [header];
         let currentPage = [];
         let currentPageHeight = header.offsetHeight;
-        const maxPageHeight = 265; // Altezza massima per pagina in mm (A4 - margini)
+        const maxPageHeight = 275; // Altezza massima per pagina in mm (A4 - margini)
         
         // Distribuisci le sezioni nelle pagine
         for (const section of sections) {
