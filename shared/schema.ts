@@ -1,6 +1,7 @@
 import { pgTable, text, serial, integer, boolean, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { v4 as uuidv4 } from 'uuid';
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -23,6 +24,12 @@ export const insertUserSchema = createInsertSchema(users).pick({
   password: true,
 });
 
+export const languageSchema = z.object({
+  id: z.string().default(() => uuidv4()),
+  name: z.string(),
+  level: z.number().min(1).max(5),
+});
+
 export const personalInfoSchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
@@ -31,6 +38,9 @@ export const personalInfoSchema = z.object({
   address: z.string().optional(),
   description: z.string().optional(),
   photo: z.string().optional(),
+  drivingLicense: z.string().optional(),
+  hasCar: z.boolean().default(false),
+  languages: z.array(languageSchema).default([]),
 });
 
 export const experienceSchema = z.object({
@@ -79,3 +89,4 @@ export type PersonalInfo = z.infer<typeof personalInfoSchema>;
 export type Experience = z.infer<typeof experienceSchema>;
 export type Education = z.infer<typeof educationSchema>;
 export type Skill = z.infer<typeof skillSchema>;
+export type Language = z.infer<typeof languageSchema>;
