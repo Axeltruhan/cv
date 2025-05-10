@@ -6,9 +6,11 @@ import PersonalInfoForm from "@/components/PersonalInfoForm";
 import ExperienceForm from "@/components/ExperienceForm";
 import EducationForm from "@/components/EducationForm";
 import SkillsForm from "@/components/SkillsForm";
+import LanguagesForm from "@/components/LanguagesForm";
+import DrivingInfoForm from "@/components/DrivingInfoForm";
 import CVPreview from "@/components/CVPreview";
 import { useToast } from "@/hooks/use-toast";
-import { PersonalInfo, Experience, Education, Skill } from "@shared/schema";
+import { PersonalInfo, Experience, Education, Skill, Language } from "@shared/schema";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { v4 as uuidv4 } from "uuid";
@@ -24,6 +26,9 @@ const Home = () => {
     address: "",
     description: "",
     photo: "",
+    drivingLicense: "",
+    hasCar: false,
+    languages: []
   });
   
   const [experiences, setExperiences] = useState<Experience[]>([]);
@@ -99,6 +104,36 @@ const Home = () => {
   
   const removeSkill = (id: string) => {
     setSkills(skills.filter(skill => skill.id !== id));
+  };
+  
+  const addLanguage = () => {
+    setPersonalInfo({
+      ...personalInfo,
+      languages: [
+        ...personalInfo.languages,
+        {
+          id: uuidv4(),
+          name: "",
+          level: 3
+        }
+      ]
+    });
+  };
+
+  const updateLanguage = (updatedLanguage: Language) => {
+    setPersonalInfo({
+      ...personalInfo,
+      languages: personalInfo.languages.map(lang => 
+        lang.id === updatedLanguage.id ? updatedLanguage : lang
+      )
+    });
+  };
+  
+  const removeLanguage = (id: string) => {
+    setPersonalInfo({
+      ...personalInfo,
+      languages: personalInfo.languages.filter(lang => lang.id !== id)
+    });
   };
   
   const downloadCV = async () => {
@@ -221,7 +256,7 @@ const Home = () => {
           {/* Left Column - Forms */}
           <div className="space-y-6">
             <Tabs defaultValue="info" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-6">
                 <TabsTrigger value="info">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -248,6 +283,18 @@ const Home = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                   Competenze
+                </TabsTrigger>
+                <TabsTrigger value="languages">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                  </svg>
+                  Lingue
+                </TabsTrigger>
+                <TabsTrigger value="driving">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                  </svg>
+                  Patente
                 </TabsTrigger>
               </TabsList>
               
@@ -283,6 +330,22 @@ const Home = () => {
                   addSkill={addSkill}
                   updateSkill={updateSkill}
                   removeSkill={removeSkill}
+                />
+              </TabsContent>
+              
+              <TabsContent value="languages">
+                <LanguagesForm 
+                  languages={personalInfo.languages}
+                  addLanguage={addLanguage}
+                  updateLanguage={updateLanguage}
+                  removeLanguage={removeLanguage}
+                />
+              </TabsContent>
+              
+              <TabsContent value="driving">
+                <DrivingInfoForm 
+                  personalInfo={personalInfo}
+                  setPersonalInfo={setPersonalInfo}
                 />
               </TabsContent>
             </Tabs>
