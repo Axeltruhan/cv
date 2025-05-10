@@ -196,22 +196,64 @@ const Home = () => {
       const imgWidth = pageWidth;
       const imgHeight = canvas.height * imgWidth / canvas.width;
       
-      // Suddividi in più pagine se necessario
-      let heightLeft = imgHeight;
-      let position = 0;
-      let pageNumber = 1;
+      // Ottieni gli elementi principali del CV per identificare i punti di interruzione
+      const sections = Array.from(cvElement.querySelectorAll('h2.text-lg.font-semibold.mb-4'));
+      const sectionPositions = sections.map(section => {
+        const rect = section.getBoundingClientRect();
+        const cvRect = cvElement.getBoundingClientRect();
+        return (rect.top - cvRect.top) * imgHeight / canvas.height;
+      });
       
-      // Aggiungi la prima pagina
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      // Aggiungi l'inizio e la fine del documento alle posizioni
+      sectionPositions.unshift(0);
+      sectionPositions.push(imgHeight);
       
-      // Aggiungi pagine aggiuntive se necessario
-      while (heightLeft > 0) {
-        position = -pageHeight * pageNumber;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-        pageNumber++;
+      // Calcola quante pagine saranno necessarie
+      const totalPages = Math.ceil(imgHeight / pageHeight);
+      
+      // Per ogni pagina, trova il miglior punto di interruzione
+      for (let pageNum = 0; pageNum < totalPages; pageNum++) {
+        const pageStart = pageNum * pageHeight;
+        const pageEnd = (pageNum + 1) * pageHeight;
+        
+        // Trova il punto di interruzione più adatto
+        let bestBreakPoint = pageEnd;
+        
+        // Cerca la sezione che inizia dopo l'inizio della pagina ma prima della fine
+        // e che è più vicina alla fine della pagina
+        for (let i = 0; i < sectionPositions.length - 1; i++) {
+          const sectionStart = sectionPositions[i];
+          const nextSectionStart = sectionPositions[i + 1];
+          
+          // Se l'inizio della sezione è nella pagina corrente
+          if (sectionStart >= pageStart && sectionStart < pageEnd) {
+            // Se la sezione è troppo grande per stare in una pagina, la mettiamo comunque all'inizio della pagina
+            if (nextSectionStart - sectionStart > pageHeight) {
+              if (sectionStart > pageStart) {
+                bestBreakPoint = sectionStart;
+              }
+            } 
+            // Altrimenti verifichiamo se la sezione può stare interamente nella pagina
+            else if (nextSectionStart <= pageEnd) {
+              // La sezione può stare nella pagina, non facciamo nulla
+            } 
+            // Se la sezione non può stare interamente nella pagina, la spostiamo alla pagina successiva
+            else if (sectionStart > pageStart) {
+              bestBreakPoint = sectionStart;
+            }
+          }
+        }
+        
+        // Aggiungi la pagina
+        if (pageNum > 0) {
+          pdf.addPage();
+        }
+        
+        // Calcola la posizione verticale dell'immagine
+        const yPos = -pageStart;
+        
+        // Aggiungi l'immagine alla pagina
+        pdf.addImage(imgData, 'PNG', 0, yPos, imgWidth, imgHeight);
       }
       
       pdf.save(`CV_${personalInfo.firstName}_${personalInfo.lastName || 'CV'}.pdf`);
