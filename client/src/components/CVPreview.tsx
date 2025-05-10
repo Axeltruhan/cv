@@ -23,7 +23,7 @@ const CVPreview = ({ personalInfo, experiences, education, skills }: CVPreviewPr
       </CardHeader>
       <CardContent>
         <div className="border border-gray-300 rounded-lg overflow-hidden" style={{ maxHeight: "80vh", overflowY: "auto" }}>
-          <div className="bg-white p-6 relative" id="cv-preview" style={{ width: "100%" }}>
+          <div className="bg-white p-8 relative border border-gray-300 rounded-sm" id="cv-preview" style={{ width: "100%" }}>
             {/* CV Header */}
             <div className="flex flex-col items-start mb-6 pb-6 border-b border-gray-300">
               <div className="flex flex-row w-full mb-4">

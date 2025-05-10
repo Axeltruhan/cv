@@ -137,138 +137,169 @@ const Home = () => {
   };
   
   const downloadCV = async () => {
+    const cvElement = document.getElementById('cv-preview');
+    
+    if (!cvElement) {
+      toast({
+        title: "Errore",
+        description: "Impossibile generare il PDF. Elemento CV non trovato.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     try {
       toast({
         title: "Preparazione",
         description: "Generazione del PDF in corso...",
       });
       
-      // Creiamo un nuovo PDF in formato A4
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
+      // Creare una copia del CV per la generazione del PDF con dimensioni fisse tipo A4
+      const pdfContainer = document.createElement('div');
+      const borderWidth = 1; // Larghezza del bordo in mm
+      const marginSize = 10; // Margine in mm
       
       // Dimensioni della pagina A4
       const pageWidth = 210;
       const pageHeight = 297;
       
-      // Suddividiamo il contenuto del CV in sezioni separate
+      // Dimensioni interne disponibili (consideriamo margini e bordo)
+      const contentWidth = pageWidth - (marginSize * 2) - (borderWidth * 2);
+      const contentHeight = pageHeight - (marginSize * 2) - (borderWidth * 2);
+
+      // Dimensioni del container per rispettare proporzioni A4
+      pdfContainer.style.width = `${contentWidth}mm`;
+      pdfContainer.style.height = 'auto';
+      pdfContainer.style.backgroundColor = 'white';
+      pdfContainer.style.position = 'absolute';
+      pdfContainer.style.left = '-9999px';
+      pdfContainer.style.border = `${borderWidth}mm solid #ccc`;
+      pdfContainer.style.padding = `${marginSize}mm`;
+      pdfContainer.style.boxSizing = 'border-box';
+      document.body.appendChild(pdfContainer);
+            
+      // Clona il contenuto del CV
+      const clonedCV = cvElement.cloneNode(true) as HTMLElement;
       
-      // 1. Sezione Informazioni Personali
-      const headerSection = document.querySelector('#cv-preview .flex.flex-col.items-start.mb-6');
-      if (headerSection) {
-        const headerCanvas = await html2canvas(headerSection as HTMLElement, {
+      // Rimuoviamo il bordo dal clone (perché lo abbiamo già aggiunto al container)
+      clonedCV.style.border = 'none';
+      clonedCV.style.width = '100%';
+      clonedCV.style.padding = '0';
+      clonedCV.id = 'cv-preview-pdf';
+      
+      pdfContainer.appendChild(clonedCV);
+      
+      // Array per tenere traccia dei canvas di ogni pagina
+      const pageCanvases = [];
+      
+      // Funzione per creare una nuova pagina
+      const createPage = async (contentElement, height, isLastPage = false) => {
+        const pageContainer = document.createElement('div');
+        pageContainer.style.width = `${contentWidth}mm`;
+        pageContainer.style.height = `${height}mm`;
+        pageContainer.style.overflow = 'hidden';
+        pageContainer.style.position = 'relative';
+        pageContainer.style.marginBottom = isLastPage ? '0' : '20px'; // Spazio tra pagine
+        document.body.appendChild(pageContainer);
+        
+        // Clona il contenuto per questa pagina
+        const pageContent = contentElement.cloneNode(true) as HTMLElement;
+        pageContainer.appendChild(pageContent);
+        
+        // Genera il canvas per questa pagina
+        const pageCanvas = await html2canvas(pageContainer, {
           scale: 2,
           useCORS: true,
           allowTaint: true,
           backgroundColor: "#ffffff",
         });
         
-        const headerImgWidth = pageWidth;
-        const headerImgHeight = headerCanvas.height * headerImgWidth / headerCanvas.width;
-        const headerImgData = headerCanvas.toDataURL('image/png');
+        pageCanvases.push(pageCanvas);
         
-        pdf.addImage(headerImgData, 'PNG', 0, 0, headerImgWidth, headerImgHeight);
+        // Rimuovi gli elementi temporanei
+        document.body.removeChild(pageContainer);
+      };
+      
+      // Genera il PDF usando jsPDF
+      const generatePDF = async () => {
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4',
+          compress: true
+        });
         
-        // Posizione verticale corrente
-        let currentY = headerImgHeight + 5; // Aggiungiamo un po' di spazio
-        
-        // 2. Aggiungiamo le altre sezioni una per una
-        const mainSections = Array.from(document.querySelectorAll('#cv-preview > div.mb-6')).filter(
-          section => section !== headerSection
-        );
-        
-        for (const section of mainSections) {
-          const sectionCanvas = await html2canvas(section as HTMLElement, {
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: "#ffffff",
-          });
+        // Per ogni pagina canvas generata
+        for (let i = 0; i < pageCanvases.length; i++) {
+          const canvas = pageCanvases[i];
           
-          const sectionImgWidth = pageWidth;
-          const sectionImgHeight = sectionCanvas.height * sectionImgWidth / sectionCanvas.width;
-          const sectionImgData = sectionCanvas.toDataURL('image/png');
-          
-          // Controlla se la sezione può entrare nella pagina corrente
-          if (currentY + sectionImgHeight > pageHeight) {
-            // Se non c'è abbastanza spazio, aggiungi una nuova pagina
+          // Se non è la prima pagina, aggiungi una nuova pagina
+          if (i > 0) {
             pdf.addPage();
-            currentY = 0;
           }
           
-          // Aggiungi la sezione alla pagina corrente
-          pdf.addImage(sectionImgData, 'PNG', 0, currentY, sectionImgWidth, sectionImgHeight);
+          // Aggiungi l'immagine della pagina
+          const imgData = canvas.toDataURL('image/jpeg', 0.95);
           
-          // Aggiorna la posizione verticale
-          currentY += sectionImgHeight + 5; // Aggiungiamo un po' di spazio tra le sezioni
+          // Calcola le dimensioni per mantenere le proporzioni
+          const imgWidth = pageWidth;
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+          
+          // Centrato nella pagina
+          pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
         }
+        
+        // Salva il PDF
+        pdf.save(`CV_${personalInfo.firstName}_${personalInfo.lastName || 'CV'}.pdf`);
+      };
+      
+      // Dividi il contenuto in sezioni
+      const sections = Array.from(clonedCV.children).filter(
+        child => child.nodeName !== 'SCRIPT' && child.nodeName !== 'STYLE'
+      );
+      
+      // Calcola l'altezza totale del contenuto
+      let totalHeight = 0;
+      sections.forEach(section => {
+        totalHeight += (section as HTMLElement).offsetHeight;
+      });
+      
+      // Stima il numero di pagine necessarie
+      const estimatedPages = Math.ceil(totalHeight / (contentHeight - 20)); // -20 per sicurezza
+      
+      if (estimatedPages <= 1) {
+        // Se il contenuto sta in una pagina, crea una sola pagina
+        await createPage(clonedCV, contentHeight, true);
       } else {
-        // Fallback nel caso in cui la suddivisione in sezioni non funzioni
-        const cvElement = document.getElementById('cv-preview');
-        
-        if (!cvElement) {
-          toast({
-            title: "Errore",
-            description: "Impossibile generare il PDF. Elemento CV non trovato.",
-            variant: "destructive"
-          });
-          return;
-        }
-        
-        // Modifichiamo temporaneamente lo stile dell'elemento per ottenere una pagina completa
-        const originalStyle = {
-          maxHeight: cvElement.style.maxHeight,
-          overflowY: cvElement.style.overflowY,
-          height: cvElement.style.height
-        };
-        
-        // Rimuovi limiti di altezza per la generazione del PDF
-        cvElement.style.maxHeight = "none";
-        cvElement.style.overflowY = "visible";
-        cvElement.style.height = "auto";
-        
-        // Creiamo il canvas con dimensioni complete
-        const canvas = await html2canvas(cvElement, {
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: "#ffffff",
-          scrollY: 0,
-          windowHeight: cvElement.scrollHeight
-        });
-        
-        // Ripristiniamo lo stile originale
-        cvElement.style.maxHeight = originalStyle.maxHeight;
-        cvElement.style.overflowY = originalStyle.overflowY;
-        cvElement.style.height = originalStyle.height;
-        
-        const imgData = canvas.toDataURL('image/png');
-        
-        // Calcola le dimensioni proporzionali dell'immagine
-        const imgWidth = pageWidth;
-        const imgHeight = canvas.height * imgWidth / canvas.width;
-        
-        // Se l'immagine è più grande della pagina, la suddividiamo in più pagine
-        let heightLeft = imgHeight;
-        let position = 0;
-        let pageNumber = 1;
-        
-        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, Math.min(imgHeight, pageHeight));
-        heightLeft -= pageHeight;
-        
-        while (heightLeft > 0) {
-          position = -pageHeight * pageNumber;
-          pdf.addPage();
-          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-          heightLeft -= pageHeight;
-          pageNumber++;
+        // Altrimenti, dobbiamo dividere il contenuto in più pagine
+        // Rendi ogni sezione come pagina separata
+        for (let i = 0; i < sections.length; i++) {
+          const section = sections[i];
+          const isLastSection = i === sections.length - 1;
+          
+          // Calcola l'altezza della sezione
+          const sectionHeight = (section as HTMLElement).offsetHeight;
+          
+          // Se la sezione è troppo grande per una pagina, dividi ulteriormente
+          if (sectionHeight > contentHeight) {
+            // Per le sezioni grandi, impostiamo un'altezza fissa
+            const pageContainer = document.createElement('div');
+            pageContainer.appendChild(section.cloneNode(true));
+            await createPage(pageContainer, contentHeight, isLastSection);
+          } else {
+            // Per le sezioni normali, manteniamo l'altezza naturale
+            const pageContainer = document.createElement('div');
+            pageContainer.appendChild(section.cloneNode(true));
+            await createPage(pageContainer, Math.min(sectionHeight + 10, contentHeight), isLastSection);
+          }
         }
       }
       
-      pdf.save(`CV_${personalInfo.firstName}_${personalInfo.lastName || 'CV'}.pdf`);
+      // Genera il PDF
+      await generatePDF();
+      
+      // Rimuovi gli elementi temporanei
+      document.body.removeChild(pdfContainer);
       
       toast({
         title: "Completato",
