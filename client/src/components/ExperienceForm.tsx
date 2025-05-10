@@ -6,6 +6,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Experience } from "@shared/schema";
 import { Plus, Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { useState } from "react";
 
 interface ExperienceFormProps {
   experiences: Experience[];
@@ -20,6 +23,8 @@ const ExperienceForm = ({
   updateExperience,
   removeExperience
 }: ExperienceFormProps) => {
+  const { toast } = useToast();
+  const [generatingDescriptions, setGeneratingDescriptions] = useState<Record<string, boolean>>({});
   
   const handleInputChange = (id: string, field: keyof Experience, value: string | boolean) => {
     const experience = experiences.find(exp => exp.id === id);
@@ -28,6 +33,45 @@ const ExperienceForm = ({
         ...experience,
         [field]: value,
       });
+    }
+  };
+  
+  const handleGenerateDescription = async (id: string) => {
+    const experience = experiences.find(exp => exp.id === id);
+    
+    if (!experience || !experience.position) {
+      toast({
+        title: "Posizione mancante",
+        description: "Inserisci una posizione per generare la descrizione.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setGeneratingDescriptions(prev => ({ ...prev, [id]: true }));
+    
+    try {
+      const response = await apiRequest('get', `/api/generate-description?title=${encodeURIComponent(experience.position)}`, undefined);
+      const data = await response.json();
+      
+      updateExperience({
+        ...experience,
+        description: data.description
+      });
+      
+      toast({
+        title: "Descrizione generata",
+        description: "La descrizione delle mansioni è stata generata con successo.",
+      });
+    } catch (error) {
+      console.error("Error generating description:", error);
+      toast({
+        title: "Errore",
+        description: "Impossibile generare la descrizione. Riprova più tardi.",
+        variant: "destructive"
+      });
+    } finally {
+      setGeneratingDescriptions(prev => ({ ...prev, [id]: false }));
     }
   };
 
@@ -135,13 +179,45 @@ const ExperienceForm = ({
                   
                   <div className="space-y-2">
                     <Label htmlFor={`description-${experience.id}`}>Descrizione</Label>
-                    <Textarea
-                      id={`description-${experience.id}`}
-                      value={experience.description}
-                      onChange={(e) => handleInputChange(experience.id, 'description', e.target.value)}
-                      placeholder="Descrivi le tue responsabilità e risultati"
-                      rows={3}
-                    />
+                    <div className="flex items-start space-x-2">
+                      <Textarea
+                        id={`description-${experience.id}`}
+                        value={experience.description}
+                        onChange={(e) => handleInputChange(experience.id, 'description', e.target.value)}
+                        placeholder="Descrivi le tue responsabilità e risultati"
+                        rows={3}
+                        className="flex-1"
+                      />
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="outline"
+                        onClick={() => handleGenerateDescription(experience.id)}
+                        title="Genera automaticamente una descrizione basata sulla posizione"
+                        disabled={!experience.position || generatingDescriptions[experience.id]}
+                      >
+                        {generatingDescriptions[experience.id] ? (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin">
+                            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                          </svg>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide">
+                            <path d="M17 7.8A6 6 0 0 0 6 7.8c-2.7 3.5-2 8.4.7 10.7.2.2.3.4.3.6 0 1-.8 1.9-1.9 1.9H5a2 2 0 0 0-2 2c0 .6.4 1 1 1h16c.6 0 1-.4 1-1a2 2 0 0 0-2-2h-.1c-1 0-1.9-.8-1.9-1.9 0-.2.1-.4.3-.6 2.7-2.3 3.3-7.2.7-10.7z"/>
+                            <path d="m4.5 16 2.5-4.5"/>
+                            <path d="M20 7.5c-3 1-5.5.5-8-1"/>
+                            <path d="M7.5 7.7C8.8 9.2 10 14 10 17"/>
+                            <path d="m13 17 3 5"/>
+                            <path d="M16 18h-6"/>
+                          </svg>
+                        )}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Clicca sull'icona per generare automaticamente una descrizione basata sulla posizione
+                    </p>
                   </div>
                 </div>
               </div>

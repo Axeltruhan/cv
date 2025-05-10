@@ -237,6 +237,7 @@ const Home = () => {
               <TabsContent value="skills">
                 <SkillsForm 
                   skills={skills}
+                  experiences={experiences}
                   addSkill={addSkill}
                   updateSkill={updateSkill}
                   removeSkill={removeSkill}
