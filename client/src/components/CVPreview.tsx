@@ -185,14 +185,9 @@ const CVPreview = ({ personalInfo, experiences, education, skills }: CVPreviewPr
                   {personalInfo.languages.map((language) => (
                     <div key={language.id} className="flex items-center">
                       <span className="text-sm mr-2 flex-1">{language.name || 'Lingua'}</span>
-                      <div className="flex">
-                        {[1, 2, 3, 4, 5].map((level) => (
-                          <div 
-                            key={level}
-                            className={`w-4 h-4 rounded-full mx-0.5 ${level <= language.level ? 'bg-primary' : 'bg-gray-200'}`}
-                          ></div>
-                        ))}
-                      </div>
+                      <span className="text-sm px-2 py-1 bg-primary text-white rounded font-medium">
+                        {language.level}
+                      </span>
                     </div>
                   ))}
                 </div>

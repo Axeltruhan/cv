@@ -19,7 +19,7 @@ const LanguagesForm = ({
   updateLanguage,
   removeLanguage,
 }: LanguagesFormProps) => {
-  const handleLevelChange = (id: string, level: number) => {
+  const handleLevelChange = (id: string, level: "A1" | "A2" | "B1" | "B2" | "C1" | "C2") => {
     const language = languages.find(lang => lang.id === id);
     if (language) {
       updateLanguage({ ...language, level });
@@ -61,15 +61,15 @@ const LanguagesForm = ({
               />
               
               <div className="mt-4">
-                <Label>Livello di conoscenza</Label>
-                <div className="flex items-center space-x-2 mt-2">
-                  {[1, 2, 3, 4, 5].map((level) => (
+                <Label>Livello di conoscenza (QCER)</Label>
+                <div className="flex flex-wrap items-center gap-2 mt-2">
+                  {["A1", "A2", "B1", "B2", "C1", "C2"].map((level) => (
                     <button
                       key={level}
                       type="button"
-                      onClick={() => handleLevelChange(language.id, level)}
-                      className={`w-8 h-8 rounded-full transition-colors ${
-                        level <= language.level
+                      onClick={() => handleLevelChange(language.id, level as "A1" | "A2" | "B1" | "B2" | "C1" | "C2")}
+                      className={`w-12 h-10 rounded-md transition-colors ${
+                        level === language.level
                           ? 'bg-primary text-white'
                           : 'bg-gray-200 text-gray-500 hover:bg-gray-300'
                       }`}
@@ -77,6 +77,9 @@ const LanguagesForm = ({
                       {level}
                     </button>
                   ))}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">
+                  QCER: Quadro Comune Europeo di Riferimento per le lingue
                 </div>
               </div>
             </div>

@@ -114,7 +114,7 @@ const Home = () => {
         {
           id: uuidv4(),
           name: "",
-          level: 3
+          level: "B1"
         }
       ]
     });
