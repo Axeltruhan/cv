@@ -26,7 +26,6 @@ export const insertUserSchema = createInsertSchema(users).pick({
 export const personalInfoSchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
-  title: z.string(),
   email: z.string().email().optional(),
   phone: z.string().optional(),
   address: z.string().optional(),

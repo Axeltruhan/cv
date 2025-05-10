@@ -19,7 +19,6 @@ const Home = () => {
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
     firstName: "",
     lastName: "",
-    title: "",
     email: "",
     phone: "",
     address: "",

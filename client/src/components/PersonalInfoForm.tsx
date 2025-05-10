@@ -54,26 +54,18 @@ const PersonalInfoForm = ({ personalInfo, setPersonalInfo }: PersonalInfoFormPro
   };
 
   const generateDescription = async () => {
-    if (!personalInfo.title) {
-      toast({
-        title: "Titolo mancante",
-        description: "Inserisci un titolo professionale per generare una descrizione.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
     setIsGenerating(true);
     
     try {
-      const response = await apiRequest('get', `/api/generate-description?title=${encodeURIComponent(personalInfo.title)}`, undefined);
+      // Usiamo un titolo standard per generare la descrizione
+      const response = await apiRequest('get', `/api/generate-description?title=professionista`, undefined);
       const data = await response.json();
       
       setPersonalInfo({ ...personalInfo, description: data.description });
       
       toast({
         title: "Descrizione generata",
-        description: "La descrizione professionale è stata generata con successo.",
+        description: "La descrizione è stata generata con successo.",
       });
     } catch (error) {
       console.error("Error generating description:", error);
@@ -117,16 +109,7 @@ const PersonalInfoForm = ({ personalInfo, setPersonalInfo }: PersonalInfoFormPro
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="title">Titolo Professionale</Label>
-            <Input
-              id="title"
-              name="title"
-              value={personalInfo.title}
-              onChange={handleInputChange}
-              placeholder="Sviluppatore Frontend"
-            />
-          </div>
+
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -164,14 +147,14 @@ const PersonalInfoForm = ({ personalInfo, setPersonalInfo }: PersonalInfoFormPro
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Descrizione Professionale</Label>
+            <Label htmlFor="description">Su di me</Label>
             <div className="flex items-start space-x-2">
               <Textarea
                 id="description"
                 name="description"
                 value={personalInfo.description}
                 onChange={handleInputChange}
-                placeholder="Inserisci una breve descrizione professionale"
+                placeholder="Inserisci una breve descrizione su di te"
                 rows={4}
                 className="flex-1"
               />
@@ -181,7 +164,7 @@ const PersonalInfoForm = ({ personalInfo, setPersonalInfo }: PersonalInfoFormPro
                 variant="outline"
                 onClick={generateDescription}
                 disabled={isGenerating}
-                title="Genera automaticamente una descrizione basata sul titolo professionale"
+                title="Genera automaticamente una descrizione"
               >
                 <WandSparkles className="h-4 w-4" />
               </Button>
@@ -190,7 +173,7 @@ const PersonalInfoForm = ({ personalInfo, setPersonalInfo }: PersonalInfoFormPro
               <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Clicca sull'icona per generare automaticamente una descrizione basata sul titolo professionale
+              Clicca sull'icona per generare automaticamente una descrizione
             </p>
           </div>
 

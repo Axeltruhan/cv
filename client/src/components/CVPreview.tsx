@@ -42,11 +42,8 @@ const CVPreview = ({ personalInfo, experiences, education, skills }: CVPreviewPr
                 <h1 className="text-2xl font-bold">
                   {personalInfo.firstName || 'Nome'} {personalInfo.lastName || 'Cognome'}
                 </h1>
-                <p className="text-lg text-gray-700 mb-2">
-                  {personalInfo.title || 'Titolo Professionale'}
-                </p>
                 <p className="text-sm text-gray-600 mb-4">
-                  {personalInfo.description || 'Descrizione professionale'}
+                  {personalInfo.description || 'Su di me'}
                 </p>
                 
                 <div className="flex flex-wrap gap-y-1">
