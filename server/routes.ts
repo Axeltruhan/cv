@@ -64,7 +64,10 @@ function generateJobDescription(title: string): string {
     const descriptions = [
       'Designer creativo con un forte senso estetico e attenzione ai dettagli. Esperto nella creazione di interfacce utente intuitive e accessibili. Passione per lo studio del comportamento degli utenti per ottimizzare l\'esperienza di utilizzo dei prodotti digitali.',
       'UX/UI Designer con competenze nella progettazione di esperienze digitali centrate sull\'utente. Capacità di condurre ricerche, creare wireframe e prototipi interattivi. Conoscenza approfondita dei principi di usabilità e delle tendenze di design.',
-      'Designer di prodotto specializzato nella creazione di interfacce utente coinvolgenti ed efficaci. Esperienza nell\'utilizzo di metodologie di design thinking e nella conduzione di test di usabilità. Attitudine alla collaborazione con team multidisciplinari.'
+      'Designer di prodotto specializzato nella creazione di interfacce utente coinvolgenti ed efficaci. Esperienza nell\'utilizzo di metodologie di design thinking e nella conduzione di test di usabilità. Attitudine alla collaborazione con team multidisciplinari.',
+      'Designer versatile con competenze in grafica, branding e user interface. Capacità di interpretare le esigenze del cliente e tradurle in soluzioni visive efficaci. Approccio creativo e orientato alla risoluzione dei problemi.',
+      'Interaction Designer specializzato nella creazione di prototipi interattivi e nella definizione dei flussi di navigazione. Esperienza nell\'utilizzo di strumenti di design avanzati e nella collaborazione con sviluppatori frontend.',
+      'Designer con forte attenzione all\'accessibilità e all\'usabilità. Competenze nella realizzazione di interfacce inclusive e adatte a diverse tipologie di utenti. Attitudine all\'innovazione e al miglioramento continuo dei prodotti.'
     ];
     return descriptions[Math.floor(Math.random() * descriptions.length)];
   } 
@@ -73,7 +76,10 @@ function generateJobDescription(title: string): string {
     const descriptions = [
       'Professionista del marketing con esperienza nella pianificazione e implementazione di strategie di marketing digitale. Competenze nella gestione di campagne pubblicitarie, analisi dei dati e ottimizzazione della conversione.',
       'Specialista di marketing con comprovata esperienza nella creazione e gestione di campagne multicanale. Capacità di analizzare i dati di mercato e identificare opportunità di crescita. Forte orientamento ai risultati e alla misurazione delle performance.',
-      'Esperto di marketing digitale con competenze in SEO, SEM e social media marketing. Abilità nell\'identificare target di riferimento e sviluppare contenuti personalizzati. Esperienza nella gestione di budget pubblicitari e nell\'ottimizzazione del ROI.'
+      'Esperto di marketing digitale con competenze in SEO, SEM e social media marketing. Abilità nell\'identificare target di riferimento e sviluppare contenuti personalizzati. Esperienza nella gestione di budget pubblicitari e nell\'ottimizzazione del ROI.',
+      'Marketing manager con esperienza nella definizione e implementazione di strategie di branding efficaci. Competenze nella gestione delle relazioni con i clienti e nello sviluppo della brand reputation. Capacità di coordinare team di comunicazione e creativi.',
+      'Specialista in marketing dei contenuti con abilità nella creazione di materiale rilevante e coinvolgente. Esperienza nell\'utilizzo di diverse piattaforme digitali e nella gestione di blog aziendali. Competenze nella definizione di strategie editoriali mirate al pubblico di riferimento.',
+      'Data analyst specializzato in marketing con competenze avanzate nell\'analisi e interpretazione dei dati di mercato. Esperienza nell\'utilizzo di strumenti di business intelligence e nella creazione di reportistica avanzata. Capacità di tradurre i dati in strategie operative efficaci.'
     ];
     return descriptions[Math.floor(Math.random() * descriptions.length)];
   } 
@@ -82,7 +88,10 @@ function generateJobDescription(title: string): string {
     const descriptions = [
       'Manager esperto con comprovata capacità di leadership e gestione del team. Eccellenti doti organizzative e di problem solving. Orientato al risultato con focus sulla crescita aziendale e sull\'ottimizzazione dei processi.',
       'Manager con solida esperienza nella direzione di team e progetti complessi. Competenze nella definizione di obiettivi strategici e nell\'allocazione delle risorse. Capacità di motivare i collaboratori e promuovere un ambiente di lavoro positivo.',
-      'Leader aziendale con esperienza nella gestione e sviluppo di team ad alte prestazioni. Competenze nella pianificazione strategica e nel miglioramento dei processi. Capacità di prendere decisioni efficaci anche sotto pressione.'
+      'Leader aziendale con esperienza nella gestione e sviluppo di team ad alte prestazioni. Competenze nella pianificazione strategica e nel miglioramento dei processi. Capacità di prendere decisioni efficaci anche sotto pressione.',
+      'Project manager con esperienza nella gestione di progetti complessi in contesti multinazionali. Competenze nell\'utilizzo di metodologie agili e tradizionali. Capacità di gestire con efficacia budget, tempi e risorse per il raggiungimento degli obiettivi aziendali.',
+      'Manager operativo specializzato nell\'ottimizzazione dei processi aziendali e nella riduzione dei costi. Esperienza nell\'implementazione di sistemi di gestione della qualità e nel miglioramento continuo. Capacità di identificare inefficienze e implementare soluzioni innovative.',
+      'Business manager con competenze nella gestione delle relazioni con i clienti e nello sviluppo commerciale. Esperienza nella definizione e implementazione di strategie di crescita del business. Capacità di analizzare il mercato e identificare nuove opportunità di business.'
     ];
     return descriptions[Math.floor(Math.random() * descriptions.length)];
   }
