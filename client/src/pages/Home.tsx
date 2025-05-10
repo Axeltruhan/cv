@@ -119,12 +119,32 @@ const Home = () => {
         description: "Generazione del PDF in corso...",
       });
       
+      // Modifichiamo temporaneamente lo stile dell'elemento per ottenere una pagina completa
+      const originalStyle = {
+        maxHeight: cvElement.style.maxHeight,
+        overflowY: cvElement.style.overflowY,
+        height: cvElement.style.height
+      };
+      
+      // Rimuovi limiti di altezza per la generazione del PDF
+      cvElement.style.maxHeight = "none";
+      cvElement.style.overflowY = "visible";
+      cvElement.style.height = "auto";
+      
+      // Creiamo il canvas con dimensioni complete
       const canvas = await html2canvas(cvElement, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
-        backgroundColor: "#ffffff"
+        backgroundColor: "#ffffff",
+        scrollY: 0,
+        windowHeight: cvElement.scrollHeight
       });
+      
+      // Ripristiniamo lo stile originale
+      cvElement.style.maxHeight = originalStyle.maxHeight;
+      cvElement.style.overflowY = originalStyle.overflowY;
+      cvElement.style.height = originalStyle.height;
       
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
@@ -133,10 +153,32 @@ const Home = () => {
         format: 'a4'
       });
       
-      const imgWidth = 210;
+      // Dimensioni della pagina A4
+      const pageWidth = 210;
+      const pageHeight = 297;
+      
+      // Calcola le dimensioni proporzionali dell'immagine
+      const imgWidth = pageWidth;
       const imgHeight = canvas.height * imgWidth / canvas.width;
       
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      // Suddividi in più pagine se necessario
+      let heightLeft = imgHeight;
+      let position = 0;
+      let pageNumber = 1;
+      
+      // Aggiungi la prima pagina
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+      
+      // Aggiungi pagine aggiuntive se necessario
+      while (heightLeft > 0) {
+        position = -pageHeight * pageNumber;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+        pageNumber++;
+      }
+      
       pdf.save(`CV_${personalInfo.firstName}_${personalInfo.lastName || 'CV'}.pdf`);
       
       toast({
