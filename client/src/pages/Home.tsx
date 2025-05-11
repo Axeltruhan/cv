@@ -18,6 +18,9 @@ import { v4 as uuidv4 } from "uuid";
 const Home = () => {
   const { toast } = useToast();
   
+  // Template selezionato (classic, modern, professional)
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("classic");
+  
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
     firstName: "",
     lastName: "",
