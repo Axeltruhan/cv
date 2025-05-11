@@ -516,13 +516,49 @@ const Home = () => {
             </Tabs>
           </div>
           
-          {/* Right Column - CV Preview */}
+          {/* Right Column - CV Preview with Template Selector */}
           <div className="lg:sticky lg:top-8 self-start">
+            <div className="bg-white p-4 mb-4 rounded-lg border border-gray-200 shadow-sm">
+              <h3 className="text-sm font-medium mb-2 text-gray-700">Seleziona Template</h3>
+              <div className="grid grid-cols-3 gap-2">
+                <button 
+                  onClick={() => setSelectedTemplate("classic")}
+                  className={`p-2 text-xs font-medium rounded border transition-colors ${
+                    selectedTemplate === "classic" 
+                      ? "bg-primary text-white border-primary" 
+                      : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  Classico
+                </button>
+                <button 
+                  onClick={() => setSelectedTemplate("modern")}
+                  className={`p-2 text-xs font-medium rounded border transition-colors ${
+                    selectedTemplate === "modern" 
+                      ? "bg-primary text-white border-primary" 
+                      : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  Moderno
+                </button>
+                <button 
+                  onClick={() => setSelectedTemplate("professional")}
+                  className={`p-2 text-xs font-medium rounded border transition-colors ${
+                    selectedTemplate === "professional" 
+                      ? "bg-primary text-white border-primary" 
+                      : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  Professionale
+                </button>
+              </div>
+            </div>
             <CVPreview
               personalInfo={personalInfo}
               experiences={experiences}
               education={education}
               skills={skills}
+              template={selectedTemplate}
             />
           </div>
         </div>
