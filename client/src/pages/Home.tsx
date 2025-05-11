@@ -199,17 +199,56 @@ const Home = () => {
       // Nuovo approccio: dividiamo il CV in sezioni separate
       // e generiamo una pagina per ciascun gruppo di sezioni
       
-      // Troviamo tutte le sezioni del CV
-      const headerSection = cvElement.querySelector('.flex.flex-col.items-start.mb-4');
-      if (!headerSection) {
+      // In questo approccio proviamo a recuperare le sezioni principali in modo più preciso
+      // per evitare duplicazioni
+      
+      // Recuperiamo i nodi figli diretti del CV
+      const directChildren = cvElement.children;
+      console.log(`CV ha ${directChildren.length} figli diretti`);
+      
+      // Array temporaneo per le sezioni
+      let allSections: HTMLElement[] = [];
+      
+      // Troviamo l'intestazione (dovrebbe essere il primo figlio)
+      const headerSection = directChildren[0] as HTMLElement;
+      if (!headerSection || !headerSection.classList.contains('flex')) {
+        console.error("Intestazione non trovata nei figli diretti del CV");
         throw new Error("Impossibile trovare l'intestazione del CV");
       }
       
-      // Crea un array di tutte le sezioni, includendo l'intestazione come prima sezione
-      const allSections = [
-        headerSection,
-        ...Array.from(cvElement.querySelectorAll('div[class*="mb-4"]:not(.flex.flex-col.items-start)'))
-      ] as HTMLElement[];
+      // Aggiungiamo l'intestazione come prima sezione
+      allSections.push(headerSection);
+      
+      // Recuperiamo direttamente le sezioni principali esaminando gli elementi h2
+      // che sono usati come titoli delle varie sezioni
+      const sectionTitles = [
+        "Esperienze Lavorative",
+        "Formazione",
+        "Competenze",
+        "Lingue Conosciute",
+        "Informazioni di Mobilità"
+      ];
+      
+      // Per ogni titolo di sezione, troviamo l'elemento h2 corrispondente
+      // e risaliamo al div che lo contiene (che dovrebbe essere la sezione completa)
+      for (const title of sectionTitles) {
+        const elements = Array.from(cvElement.querySelectorAll('h2'))
+          .filter(el => el.textContent?.includes(title))
+          .map(el => {
+            // Risaliamo fino a trovare il div contenitore con classe mb-4
+            let parent = el.parentElement;
+            while (parent && (!parent.classList.contains('mb-4') && !parent.classList.contains('mb-6'))) {
+              parent = parent.parentElement;
+            }
+            return parent as HTMLElement;
+          })
+          .filter(el => el !== null);
+        
+        if (elements.length > 0) {
+          allSections.push(...elements);
+          console.log(`Trovati ${elements.length} elementi per la sezione "${title}"`);
+        }
+      }
       
       console.log(`Identificate ${allSections.length} sezioni nel CV`);
       
