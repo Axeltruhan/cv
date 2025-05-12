@@ -94,7 +94,8 @@ const Home = () => {
       {
         id: uuidv4(),
         name: "",
-        level: 3
+        level: 3,
+        category: ""
       }
     ]);
   };
@@ -140,9 +141,10 @@ const Home = () => {
   };
   
   const downloadCV = async () => {
-    const cvElement = document.getElementById('cv-preview');
+    // Ottieni il contenitore principale dell'anteprima CV
+    const cvContainer = document.getElementById('cv-preview');
     
-    if (!cvElement) {
+    if (!cvContainer || cvContainer.children.length === 0) {
       toast({
         title: "Errore",
         description: "Impossibile generare il PDF. Elemento CV non trovato.",
@@ -150,6 +152,9 @@ const Home = () => {
       });
       return;
     }
+    
+    // Prendi il template corrente (primo figlio di cv-preview)
+    const cvElement = cvContainer.children[0] as HTMLElement;
     
     // Controlla che ci siano dati da includere nel CV
     if (!personalInfo.firstName) {
@@ -162,7 +167,7 @@ const Home = () => {
     }
     
     // Toast per indicare che la generazione è in corso
-    const loadingToast = toast({
+    toast({
       title: "Preparazione",
       description: "Generazione del PDF in corso...",
     });
@@ -172,7 +177,7 @@ const Home = () => {
       const pageWidth = 210; // mm
       const pageHeight = 297; // mm
       
-      // Imposta margini e bordi
+      // Imposta margini
       const marginX = 8; // mm
       const marginY = 8; // mm
       
@@ -184,201 +189,116 @@ const Home = () => {
         compress: true
       });
       
-      // Salva lo stile originale del CV
-      const originalStyle = {
-        maxHeight: cvElement.style.maxHeight,
-        overflowY: cvElement.style.overflowY,
-        height: cvElement.style.height,
-        border: cvElement.style.border,
-        padding: cvElement.style.padding
-      };
+      // Approccio semplificato: renderizziamo l'intero template come un'unica immagine
       
-      // Rimuovi limiti di altezza per la generazione del PDF
-      cvElement.style.maxHeight = "none";
-      cvElement.style.overflowY = "visible";
-      cvElement.style.height = "auto";
-      cvElement.style.padding = "8mm";
-      
-      // Nuovo approccio: dividiamo il CV in sezioni separate
-      // e generiamo una pagina per ciascun gruppo di sezioni
-      
-      // In questo approccio proviamo a recuperare le sezioni principali in modo più preciso
-      // per evitare duplicazioni
-      
-      // Recuperiamo i nodi figli diretti del CV
-      const directChildren = cvElement.children;
-      console.log(`CV ha ${directChildren.length} figli diretti`);
-      
-      // Array temporaneo per le sezioni
-      let allSections: HTMLElement[] = [];
-      
-      // Troviamo l'intestazione (dovrebbe essere il primo figlio)
-      const headerSection = directChildren[0] as HTMLElement;
-      if (!headerSection || !headerSection.classList.contains('flex')) {
-        console.error("Intestazione non trovata nei figli diretti del CV");
-        throw new Error("Impossibile trovare l'intestazione del CV");
-      }
-      
-      // Aggiungiamo l'intestazione come prima sezione
-      allSections.push(headerSection);
-      
-      // Recuperiamo direttamente le sezioni principali esaminando gli elementi h2
-      // che sono usati come titoli delle varie sezioni
-      const sectionTitles = [
-        "Esperienze Lavorative",
-        "Formazione",
-        "Competenze",
-        "Lingue Conosciute",
-        "Informazioni di Mobilità"
-      ];
-      
-      // Per ogni titolo di sezione, troviamo l'elemento h2 corrispondente
-      // e risaliamo al div che lo contiene (che dovrebbe essere la sezione completa)
-      for (const title of sectionTitles) {
-        const elements = Array.from(cvElement.querySelectorAll('h2'))
-          .filter(el => el.textContent?.includes(title))
-          .map(el => {
-            // Risaliamo fino a trovare il div contenitore con classe mb-4
-            let parent = el.parentElement;
-            while (parent && (!parent.classList.contains('mb-4') && !parent.classList.contains('mb-6'))) {
-              parent = parent.parentElement;
-            }
-            return parent as HTMLElement;
-          })
-          .filter(el => el !== null);
-        
-        if (elements.length > 0) {
-          allSections.push(...elements);
-          console.log(`Trovati ${elements.length} elementi per la sezione "${title}"`);
-        }
-      }
-      
-      console.log(`Identificate ${allSections.length} sezioni nel CV`);
-      
-      // Crea un contenitore temporaneo per le sezioni
+      // Crea un contenitore temporaneo
       const tempContainer = document.createElement('div');
       tempContainer.style.position = 'absolute';
       tempContainer.style.left = '-9999px';
       tempContainer.style.top = '0';
       tempContainer.style.width = `${pageWidth - (marginX * 2)}mm`;
       tempContainer.style.backgroundColor = 'white';
-      tempContainer.style.border = '0.5mm solid #ccc';
-      tempContainer.style.padding = '4mm';
+      tempContainer.style.padding = '0';
+      tempContainer.style.margin = '0';
       tempContainer.style.boxSizing = 'border-box';
       document.body.appendChild(tempContainer);
       
-      // Funzione per generare una pagina con un insieme di sezioni
-      const renderPage = async (sections: HTMLElement[]) => {
-        // Reset il contenitore
-        tempContainer.innerHTML = '';
-        
-        // Aggiungi ogni sezione al contenitore
-        sections.forEach(section => {
-          const clone = section.cloneNode(true) as HTMLElement;
-          tempContainer.appendChild(clone);
-        });
-        
-        // Genera il canvas per questa pagina
-        const canvas = await html2canvas(tempContainer, {
-          scale: 2, 
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: "#ffffff",
-          logging: false
-        });
-        
-        // Aggiungi l'immagine al PDF
-        const imgWidth = pageWidth - (marginX * 2);
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        
+      // Clona il contenuto del CV nel contenitore temporaneo
+      const cvClone = cvElement.cloneNode(true) as HTMLElement;
+      cvClone.style.padding = '0';
+      cvClone.style.margin = '0';
+      cvClone.style.border = 'none';
+      tempContainer.appendChild(cvClone);
+      
+      // Genera il canvas dal contenitore temporaneo
+      const canvas = await html2canvas(tempContainer, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+        onclone: (clonedDoc) => {
+          // Assicurati che lo stile venga mantenuto nella clonazione
+          const clonedElement = clonedDoc.querySelector('#cv-preview')?.children[0] as HTMLElement;
+          if (clonedElement) {
+            clonedElement.style.width = '100%';
+            clonedElement.style.padding = '4mm';
+            clonedElement.style.margin = '0';
+          }
+        }
+      });
+      
+      // Calcola la larghezza e l'altezza dell'immagine
+      const imgWidth = pageWidth - (marginX * 2);
+      let imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      // Se l'altezza dell'immagine supera la pagina, devi dividerla in più pagine
+      const maxHeight = pageHeight - (marginY * 2);
+      
+      if (imgHeight <= maxHeight) {
+        // Se l'immagine entra in una pagina, aggiungila al PDF
         pdf.addImage(
-          canvas.toDataURL('image/jpeg', 0.95), 'JPEG',
+          canvas.toDataURL('image/jpeg', 0.95), 
+          'JPEG',
           marginX, marginY,
           imgWidth, imgHeight
         );
+      } else {
+        // Se l'immagine è più grande della pagina, dividila in più pagine
+        let currentPosition = 0;
         
-        return {width: imgWidth, height: imgHeight};
-      };
-      
-      // Raggruppiamo le sezioni in pagine
-      // Prima determiniamo le dimensioni di ogni sezione
-      console.log("Calcolando le dimensioni di ogni sezione...");
-      
-      const sectionDimensions = [];
-      for (let i = 0; i < allSections.length; i++) {
-        tempContainer.innerHTML = '';
-        const clone = allSections[i].cloneNode(true) as HTMLElement;
-        tempContainer.appendChild(clone);
-        
-        const canvas = await html2canvas(tempContainer, {
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: "#ffffff",
-          logging: false
-        });
-        
-        const width = pageWidth - (marginX * 2);
-        const height = (canvas.height * width) / canvas.width;
-        sectionDimensions.push({ width, height });
-        
-        console.log(`Sezione ${i}: altezza ${height}mm`);
-      }
-      
-      // Ora distribuiamo le sezioni in pagine
-      const maxHeight = pageHeight - (marginY * 2 + 10); // Altezza massima per pagina con margine di sicurezza
-      let currentPage: HTMLElement[] = [];
-      let currentPageHeight = 0;
-      let pageNumber = 0;
-      
-      console.log(`Altezza massima per pagina: ${maxHeight}mm`);
-      
-      for (let i = 0; i < allSections.length; i++) {
-        const section = allSections[i];
-        const sectionHeight = sectionDimensions[i].height;
-        
-        // Se aggiungere questa sezione supera l'altezza massima della pagina
-        if (currentPageHeight + sectionHeight > maxHeight && currentPage.length > 0) {
-          // Rendering della pagina corrente
-          console.log(`Rendering pagina ${pageNumber} con ${currentPage.length} sezioni`);
-          if (pageNumber > 0) {
+        while (currentPosition < canvas.height) {
+          // Calcola l'altezza della sezione corrente
+          const canvasSectionHeight = Math.min(
+            canvas.height - currentPosition,
+            (maxHeight / imgHeight) * canvas.height
+          );
+          
+          // Calcola l'altezza in millimetri della sezione corrente
+          const pdfSectionHeight = (canvasSectionHeight * imgHeight) / canvas.height;
+          
+          // Crea un canvas temporaneo per questa sezione
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = canvas.width;
+          tempCanvas.height = canvasSectionHeight;
+          
+          // Disegna la sezione corrente sul canvas temporaneo
+          const ctx = tempCanvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(
+              canvas,
+              0, currentPosition,
+              canvas.width, canvasSectionHeight,
+              0, 0,
+              canvas.width, canvasSectionHeight
+            );
+            
+            // Aggiungi l'immagine della sezione al PDF
+            pdf.addImage(
+              tempCanvas.toDataURL('image/jpeg', 0.95),
+              'JPEG',
+              marginX, marginY,
+              imgWidth, pdfSectionHeight
+            );
+          }
+          
+          // Passa alla sezione successiva
+          currentPosition += canvasSectionHeight;
+          
+          // Aggiungi una nuova pagina se ci sono altre sezioni da aggiungere
+          if (currentPosition < canvas.height) {
             pdf.addPage();
           }
-          await renderPage(currentPage);
-          pageNumber++;
-          
-          // Inizia una nuova pagina con questa sezione
-          currentPage = [section];
-          currentPageHeight = sectionHeight;
-        } else {
-          // Aggiungi la sezione alla pagina corrente
-          currentPage.push(section);
-          currentPageHeight += sectionHeight;
         }
-      }
-      
-      // Rendering dell'ultima pagina se non è vuota
-      if (currentPage.length > 0) {
-        console.log(`Rendering ultima pagina ${pageNumber} con ${currentPage.length} sezioni`);
-        if (pageNumber > 0) {
-          pdf.addPage();
-        }
-        await renderPage(currentPage);
       }
       
       // Salva il PDF
       pdf.save(`CV_${personalInfo.firstName}_${personalInfo.lastName || 'CV'}.pdf`);
       
-      // Ripristina gli stili originali
-      cvElement.style.maxHeight = originalStyle.maxHeight;
-      cvElement.style.overflowY = originalStyle.overflowY;
-      cvElement.style.height = originalStyle.height;
-      cvElement.style.border = originalStyle.border;
-      cvElement.style.padding = originalStyle.padding;
-      
       // Rimuovi l'elemento temporaneo
       document.body.removeChild(tempContainer);
       
+      // Mostra messaggio di completamento
       toast({
         title: "Completato",
         description: "Il tuo CV è stato scaricato correttamente.",
@@ -437,7 +357,7 @@ const Home = () => {
                 <TabsTrigger value="education" className="flex-1 min-w-[33%] sm:min-w-[16.666%]">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path d="M12 14l9-5-9-5-9 5 9 5z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998a12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
                   </svg>
                   <span className="text-xs sm:text-sm truncate">Formazione</span>
                 </TabsTrigger>
