@@ -440,7 +440,7 @@ const Home = () => {
           <div className="lg:sticky lg:top-8 self-start">
             <div className="bg-white p-4 mb-4 rounded-lg border border-gray-200 shadow-sm">
               <h3 className="text-sm font-medium mb-2 text-gray-700">Seleziona Template</h3>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <button 
                   onClick={() => setSelectedTemplate("classic")}
                   className={`p-2 text-xs font-medium rounded border transition-colors ${
@@ -470,6 +470,16 @@ const Home = () => {
                   }`}
                 >
                   Professionale
+                </button>
+                <button 
+                  onClick={() => setSelectedTemplate("modern3d")}
+                  className={`p-2 text-xs font-medium rounded border transition-colors bg-gradient-to-r ${
+                    selectedTemplate === "modern3d" 
+                      ? "from-purple-500 to-indigo-600 text-white border-indigo-600" 
+                      : "from-purple-100 to-indigo-100 text-indigo-700 border-indigo-200 hover:from-purple-200 hover:to-indigo-200"
+                  }`}
+                >
+                  <span className="drop-shadow-sm">3D Moderno</span>
                 </button>
               </div>
             </div>

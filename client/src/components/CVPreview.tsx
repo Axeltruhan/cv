@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ClassicTemplate from "./templates/ClassicTemplate";
 import ModernTemplate from "./templates/ModernTemplate";
 import ProfessionalTemplate from "./templates/ProfessionalTemplate";
+import Modern3DTemplate from "./templates/Modern3DTemplate";
 
 interface CVPreviewProps {
   personalInfo: PersonalInfo;
@@ -25,6 +26,13 @@ const CVPreview = ({ personalInfo, experiences, education, skills, template = "c
         />;
       case "professional":
         return <ProfessionalTemplate 
+          personalInfo={personalInfo} 
+          experiences={experiences} 
+          education={education} 
+          skills={skills} 
+        />;
+      case "modern3d":
+        return <Modern3DTemplate 
           personalInfo={personalInfo} 
           experiences={experiences} 
           education={education} 
