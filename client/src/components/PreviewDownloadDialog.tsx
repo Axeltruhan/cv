@@ -26,6 +26,7 @@ interface SectionPosition {
   height: number;
   originalTop: number;
   originalLeft: number;
+  isDragging?: boolean;
 }
 
 const PreviewDownloadDialog = ({ 
@@ -334,6 +335,92 @@ const PreviewDownloadDialog = ({
     }
   };
   
+  // Stato per drag and drop
+  const [dragStartPosition, setDragStartPosition] = useState<{ x: number, y: number } | null>(null);
+  const [dragOffset, setDragOffset] = useState<{ x: number, y: number } | null>(null);
+
+  // Handle section drag start
+  const handleDragStart = (e: React.MouseEvent, sectionId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Trova la sezione e imposta il flag di trascinamento
+    setSections(prev => 
+      prev.map(section => 
+        section.id === sectionId 
+          ? { ...section, isDragging: true } 
+          : section
+      )
+    );
+    
+    setSelectedSection(sectionId);
+    setDragStartPosition({ x: e.clientX, y: e.clientY });
+    
+    // Calcola l'offset dal punto cliccato all'angolo superiore sinistro dell'elemento
+    const sectionElement = document.getElementById(`preview-section-${sectionId}`);
+    if (sectionElement) {
+      const rect = sectionElement.getBoundingClientRect();
+      setDragOffset({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      });
+    }
+    
+    // Aggiungi event listener per il movimento e il rilascio
+    document.addEventListener('mousemove', handleDragMove);
+    document.addEventListener('mouseup', handleDragEnd);
+  };
+  
+  // Handle section drag move
+  const handleDragMove = (e: MouseEvent) => {
+    e.preventDefault();
+    
+    if (dragStartPosition && selectedSection) {
+      const movingSection = sections.find(section => section.id === selectedSection);
+      if (!movingSection || !dragOffset) return;
+      
+      // Calcola la nuova posizione considerando lo zoom
+      const previewContainer = previewRef.current;
+      if (!previewContainer) return;
+      
+      const containerRect = previewContainer.getBoundingClientRect();
+      
+      // Calcola la nuova posizione relativa al contenitore dell'anteprima e con lo zoom
+      const newLeft = (e.clientX - containerRect.left - dragOffset.x) / zoom;
+      const newTop = (e.clientY - containerRect.top - dragOffset.y) / zoom;
+      
+      // Aggiorna la posizione della sezione
+      setSections(prev => 
+        prev.map(section => 
+          section.id === selectedSection 
+            ? { ...section, left: newLeft, top: newTop } 
+            : section
+        )
+      );
+    }
+  };
+  
+  // Handle section drag end
+  const handleDragEnd = (e: MouseEvent) => {
+    e.preventDefault();
+    
+    // Rimuovi il flag di trascinamento
+    setSections(prev => 
+      prev.map(section => 
+        section.id === selectedSection 
+          ? { ...section, isDragging: false } 
+          : section
+      )
+    );
+    
+    setDragStartPosition(null);
+    setDragOffset(null);
+    
+    // Rimuovi gli event listener
+    document.removeEventListener('mousemove', handleDragMove);
+    document.removeEventListener('mouseup', handleDragEnd);
+  };
+  
   // Update section position
   const updateSectionPosition = (id: string, deltaY: number) => {
     setSections(prev => 
@@ -351,9 +438,15 @@ const PreviewDownloadDialog = ({
       prev.map(section => ({
         ...section,
         top: section.originalTop,
-        left: section.originalLeft
+        left: section.originalLeft,
+        isDragging: false
       }))
     );
+    
+    // Pulisci anche gli stati di drag and drop
+    setDragStartPosition(null);
+    setDragOffset(null);
+    setSelectedSection(null);
   };
   
   // Generate and download the PDF with adjusted section positions
@@ -504,19 +597,64 @@ const PreviewDownloadDialog = ({
                   className="max-w-none"
                 />
                 
+                {/* Istruzioni drag-and-drop */}
+                {sections.length > 0 && !selectedSection && (
+                  <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-blue-600/90 text-white px-4 py-2 rounded shadow-lg text-xs text-center z-50 max-w-[300px] pointer-events-none opacity-80">
+                    <div className="font-medium mb-1">Riposiziona le sezioni del CV</div>
+                    <p>Clicca e trascina le sezioni per riposizionarle prima della generazione del PDF</p>
+                  </div>
+                )}
+                
                 {/* Section markers */}
                 {sections.map(section => (
                   <div
                     key={section.id}
-                    className={`absolute border-2 ${selectedSection === section.id ? 'border-blue-500 bg-blue-100/20' : 'border-transparent hover:border-blue-300 hover:bg-blue-50/10'} rounded cursor-pointer transition-colors`}
+                    id={`preview-section-${section.id}`}
+                    className={`absolute border-2 ${
+                      section.isDragging 
+                        ? 'border-blue-600 bg-blue-200/30 shadow-lg' 
+                        : selectedSection === section.id 
+                          ? 'border-blue-500 bg-blue-100/20' 
+                          : 'border-transparent hover:border-blue-300 hover:bg-blue-50/10'
+                    } rounded cursor-move transition-all duration-150`}
                     style={{
                       top: `${section.top}px`,
                       left: `${section.left}px`,
                       width: `${section.width}px`,
-                      height: `${section.height}px`
+                      height: `${section.height}px`,
+                      zIndex: section.isDragging ? 50 : selectedSection === section.id ? 40 : 30
                     }}
-                    onClick={() => setSelectedSection(section.id === selectedSection ? null : section.id)}
-                  ></div>
+                    onMouseDown={(e) => handleDragStart(e, section.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!section.isDragging) {
+                        setSelectedSection(section.id === selectedSection ? null : section.id);
+                      }
+                    }}
+                  >
+                    {/* Nome della sezione visibile durante la selezione */}
+                    {(selectedSection === section.id || section.isDragging) && (
+                      <div className="absolute -top-6 left-0 bg-blue-500 text-white text-xs px-2 py-0.5 rounded-t pointer-events-none">
+                        {section.name}
+                      </div>
+                    )}
+                    
+                    {/* Messaggio di feedback per il trascinamento */}
+                    {selectedSection === section.id && !section.isDragging && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="bg-blue-600/90 text-white px-3 py-1.5 rounded shadow-md text-xs pointer-events-none">
+                          Trascina per spostare
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Handle per spostamento */}
+                    <div className="absolute top-1 right-1 w-5 h-5 flex items-center justify-center text-blue-500 opacity-70 hover:opacity-100">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-4 h-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                      </svg>
+                    </div>
+                  </div>
                 ))}
               </div>
             ) : (
@@ -619,6 +757,18 @@ const PreviewDownloadDialog = ({
                   </div>
                 ) : (
                   <div className="space-y-3 p-4">
+                    <div className="bg-blue-50 p-3 rounded-md border border-blue-100 mb-4">
+                      <div className="flex items-center mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="font-medium text-blue-700">Come riposizionare le sezioni</span>
+                      </div>
+                      <p className="text-sm text-blue-600">Clicca e trascina direttamente le sezioni nell'anteprima per riposizionarle. Ogni sezione può essere spostata liberamente prima di generare il PDF.</p>
+                    </div>
+                    
+                    <h3 className="font-medium text-sm text-gray-700 mb-2">Sezioni rilevate:</h3>
+                    
                     {sections.map(section => (
                       <div 
                         key={section.id}
@@ -629,54 +779,17 @@ const PreviewDownloadDialog = ({
                         }`}
                         onClick={() => setSelectedSection(section.id === selectedSection ? null : section.id)}
                       >
-                        <div className="font-medium text-sm mb-2">{section.name}</div>
-                        
-                        {selectedSection === section.id && (
-                          <div className="space-y-2">
-                            <div>
-                              <label className="text-xs text-gray-500 block mb-1">Posizione verticale</label>
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => updateSectionPosition(section.id, -10)}
-                                  className="h-7 px-2"
-                                >
-                                  ↑
-                                </Button>
-                                <Slider
-                                  value={[section.top]}
-                                  min={0}
-                                  max={1000}
-                                  step={1}
-                                  onValueChange={(values) => {
-                                    const newTop = values[0];
-                                    setSections(prev => 
-                                      prev.map(s => 
-                                        s.id === section.id ? { ...s, top: newTop } : s
-                                      )
-                                    );
-                                  }}
-                                  className="flex-grow"
-                                />
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => updateSectionPosition(section.id, 10)}
-                                  className="h-7 px-2"
-                                >
-                                  ↓
-                                </Button>
-                              </div>
-                            </div>
-                            
+                        <div className="flex justify-between items-center">
+                          <div className="font-medium text-sm">{section.name}</div>
+                          
+                          <div className="flex items-center space-x-1">
                             <Button
                               type="button"
-                              variant="outline"
+                              variant="ghost"
                               size="sm"
-                              onClick={() => {
+                              className="h-7 w-7 p-0 rounded-full"
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 setSections(prev => 
                                   prev.map(s => 
                                     s.id === section.id 
@@ -685,10 +798,21 @@ const PreviewDownloadDialog = ({
                                   )
                                 );
                               }}
-                              className="w-full text-xs h-7"
+                              title="Ripristina posizione originale"
                             >
-                              Reset position
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                              </svg>
                             </Button>
+                          </div>
+                        </div>
+                        
+                        {selectedSection === section.id && (
+                          <div className="mt-2 pt-2 border-t border-gray-100 text-xs text-gray-500">
+                            <p>Posizione attuale: X={Math.round(section.left)}, Y={Math.round(section.top)}</p>
+                            <p className="mt-1">
+                              <span className="text-blue-500">Suggerimento:</span> Clicca e trascina questa sezione direttamente nell'anteprima
+                            </p>
                           </div>
                         )}
                       </div>
