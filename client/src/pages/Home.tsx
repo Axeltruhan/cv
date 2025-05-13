@@ -315,19 +315,27 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-semibold text-primary flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Generatore Curriculum Interattivo
+      {/* Header moderno con effetto vetro */}
+      <header className="glass-container backdrop-blur-md sticky top-0 z-50 border-b border-white/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold flex items-center">
+            <div className="relative mr-3 h-10 w-10 flex-shrink-0">
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 blur-sm opacity-75 animate-pulse"></div>
+              <div className="relative z-10 h-full w-full flex items-center justify-center rounded-xl bg-white">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+            </div>
+            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">
+              Generatore Curriculum Interattivo
+            </span>
           </h1>
           <Button 
             onClick={downloadCV} 
-            className="bg-primary hover:bg-primary/90 text-white"
+            className="btn-3d relative overflow-hidden bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-0 shadow-lg group px-6"
           >
+            <span className="absolute inset-0 w-full h-full bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></span>
             <Download className="mr-2 h-4 w-4" /> Scarica CV
           </Button>
         </div>
