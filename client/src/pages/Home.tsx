@@ -497,6 +497,48 @@ const Home = () => {
                 >
                   <span className="drop-shadow-sm">3D Moderno</span>
                 </button>
+                
+                {/* Nuovi template */}
+                <button 
+                  onClick={() => setSelectedTemplate("minimalist")}
+                  className={`p-2 text-xs font-medium rounded border transition-colors ${
+                    selectedTemplate === "minimalist" 
+                      ? "bg-gray-800 text-white border-gray-800" 
+                      : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  Minimalista
+                </button>
+                <button 
+                  onClick={() => setSelectedTemplate("creative")}
+                  className={`p-2 text-xs font-medium rounded border transition-colors bg-gradient-to-r ${
+                    selectedTemplate === "creative" 
+                      ? "from-pink-500 to-violet-500 text-white border-pink-500" 
+                      : "from-pink-100 to-violet-100 text-violet-700 border-pink-200 hover:from-pink-200 hover:to-violet-200"
+                  }`}
+                >
+                  <span className="drop-shadow-sm">Creativo</span>
+                </button>
+                <button 
+                  onClick={() => setSelectedTemplate("academic")}
+                  className={`p-2 text-xs font-medium rounded border transition-colors ${
+                    selectedTemplate === "academic" 
+                      ? "bg-slate-700 text-white border-slate-700" 
+                      : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
+                  }`}
+                >
+                  <span className="font-serif">Accademico</span>
+                </button>
+                <button 
+                  onClick={() => setSelectedTemplate("technical")}
+                  className={`p-2 text-xs font-medium rounded border transition-colors ${
+                    selectedTemplate === "technical" 
+                      ? "bg-emerald-600 text-white border-emerald-600 font-mono" 
+                      : "bg-white text-emerald-800 border-emerald-300 hover:bg-emerald-50 font-mono"
+                  }`}
+                >
+                  <span className="tracking-tight">Tecnico</span>
+                </button>
               </div>
             </div>
             <CVPreview
