@@ -27,15 +27,18 @@ export const insertUserSchema = createInsertSchema(users).pick({
 export const languageSchema = z.object({
   id: z.string().default(() => uuidv4()),
   name: z.string(),
-  level: z.enum(["A1", "A2", "B1", "B2", "C1", "C2"]).default("A1"),
+  level: z.enum(["A1", "A2", "B1", "B2", "C1", "C2", "Base", "Intermedio", "Avanzato", "Madrelingua"]).default("A1"),
 });
 
 export const personalInfoSchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
+  title: z.string().optional().default(""),
+  summary: z.string().optional().default(""),
   email: z.string().email().optional(),
   phone: z.string().optional(),
   address: z.string().optional(),
+  location: z.string().optional(),
   description: z.string().optional(),
   photo: z.string().optional(),
   drivingLicense: z.string().optional(),
@@ -47,6 +50,7 @@ export const experienceSchema = z.object({
   id: z.string(),
   company: z.string(),
   position: z.string(),
+  title: z.string().optional(),
   startDate: z.string(),
   endDate: z.string().optional(),
   current: z.boolean().default(false),
@@ -56,6 +60,7 @@ export const experienceSchema = z.object({
 export const educationSchema = z.object({
   id: z.string(),
   institution: z.string(),
+  school: z.string().optional(),
   degree: z.string(),
   startDate: z.string(),
   endDate: z.string().optional(),

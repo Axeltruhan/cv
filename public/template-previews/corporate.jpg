@@ -1,0 +1,136 @@
+<svg width="400" height="500" viewBox="0 0 400 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="500" fill="#FFFFFF"/>
+  
+  <!-- Header section -->
+  <rect x="0" y="0" width="400" height="80" fill="url(#corporateGradient)"/>
+  <rect x="40" y="25" width="180" height="20" rx="2" fill="white"/>
+  <rect x="40" y="50" width="120" height="10" rx="2" fill="#93C5FD"/>
+  
+  <g transform="translate(280, 25)">
+    <rect width="80" height="30" rx="2" fill="transparent"/>
+    <circle cx="10" cy="15" r="4" fill="white"/>
+    <rect x="20" y="12" width="50" height="6" rx="1" fill="#93C5FD"/>
+  </g>
+  
+  <g transform="translate(280, 45)">
+    <rect width="80" height="20" rx="2" fill="transparent"/>
+    <circle cx="10" cy="10" r="4" fill="white"/>
+    <rect x="20" y="7" width="50" height="6" rx="1" fill="#93C5FD"/>
+  </g>
+  
+  <!-- Content grid -->
+  <rect x="40" y="100" width="240" height="380" rx="4" fill="#FFFFFF"/>
+  <rect x="290" y="100" width="70" height="380" rx="4" fill="#FFFFFF"/>
+  
+  <!-- Left column content -->
+  <!-- About section -->
+  <rect x="40" y="110" width="240" height="18" rx="2" fill="#1D4ED8"/>
+  <rect x="40" y="110" width="200" height="2" rx="1" fill="#BFDBFE"/>
+  
+  <rect x="40" y="140" width="240" height="4" rx="1" fill="#64748B"/>
+  <rect x="40" y="150" width="230" height="4" rx="1" fill="#64748B"/>
+  <rect x="40" y="160" width="220" height="4" rx="1" fill="#64748B"/>
+  
+  <!-- Experience section -->
+  <rect x="40" y="190" width="240" height="18" rx="2" fill="#1D4ED8"/>
+  <rect x="40" y="190" width="200" height="2" rx="1" fill="#BFDBFE"/>
+  
+  <g transform="translate(40, 220)">
+    <rect width="240" height="70" rx="4" fill="#F1F5F9"/>
+    <rect x="10" y="10" width="150" height="14" rx="2" fill="#1E40AF"/>
+    <rect x="10" y="30" width="100" height="10" rx="1" fill="#1E40AF"/>
+    <rect x="10" y="50" width="220" height="4" rx="1" fill="#64748B"/>
+    <rect x="10" y="58" width="210" height="4" rx="1" fill="#64748B"/>
+    <rect x="170" y="10" width="60" height="14" rx="7" fill="#EFF6FF"/>
+    <rect x="175" y="17" width="50" height="4" rx="1" fill="#2563EB"/>
+  </g>
+  
+  <g transform="translate(40, 300)">
+    <rect width="240" height="70" rx="4" fill="#F1F5F9"/>
+    <rect x="10" y="10" width="150" height="14" rx="2" fill="#1E40AF"/>
+    <rect x="10" y="30" width="100" height="10" rx="1" fill="#1E40AF"/>
+    <rect x="10" y="50" width="220" height="4" rx="1" fill="#64748B"/>
+    <rect x="10" y="58" width="210" height="4" rx="1" fill="#64748B"/>
+    <rect x="170" y="10" width="60" height="14" rx="7" fill="#EFF6FF"/>
+    <rect x="175" y="17" width="50" height="4" rx="1" fill="#2563EB"/>
+  </g>
+  
+  <!-- Education section -->
+  <rect x="40" y="380" width="240" height="18" rx="2" fill="#1D4ED8"/>
+  <rect x="40" y="380" width="200" height="2" rx="1" fill="#BFDBFE"/>
+  
+  <g transform="translate(40, 410)">
+    <rect width="240" height="70" rx="4" fill="#F1F5F9"/>
+    <rect x="10" y="10" width="150" height="14" rx="2" fill="#1E40AF"/>
+    <rect x="10" y="30" width="100" height="10" rx="1" fill="#1E40AF"/>
+    <rect x="10" y="50" width="220" height="4" rx="1" fill="#64748B"/>
+    <rect x="10" y="58" width="210" height="4" rx="1" fill="#64748B"/>
+    <rect x="170" y="10" width="60" height="14" rx="7" fill="#EFF6FF"/>
+    <rect x="175" y="17" width="50" height="4" rx="1" fill="#2563EB"/>
+  </g>
+  
+  <!-- Right column content -->
+  <!-- Skills section in a box -->
+  <rect x="290" y="110" width="70" height="18" rx="2" fill="#1D4ED8"/>
+  <rect x="290" y="110" width="50" height="2" rx="1" fill="#BFDBFE"/>
+  
+  <g transform="translate(290, 140)">
+    <rect width="70" height="100" rx="4" fill="#F1F5F9"/>
+    
+    <g transform="translate(10, 10)">
+      <rect width="50" height="8" rx="1" fill="#1E40AF"/>
+      <rect y="15" width="50" height="3" rx="1.5" fill="#CBD5E1"/>
+      <rect width="35" height="3" rx="1.5" fill="#2563EB"/>
+    </g>
+    
+    <g transform="translate(10, 35)">
+      <rect width="50" height="8" rx="1" fill="#1E40AF"/>
+      <rect y="15" width="50" height="3" rx="1.5" fill="#CBD5E1"/>
+      <rect width="40" height="3" rx="1.5" fill="#2563EB"/>
+    </g>
+    
+    <g transform="translate(10, 60)">
+      <rect width="50" height="8" rx="1" fill="#1E40AF"/>
+      <rect y="15" width="50" height="3" rx="1.5" fill="#CBD5E1"/>
+      <rect width="25" height="3" rx="1.5" fill="#2563EB"/>
+    </g>
+  </g>
+  
+  <!-- Languages section -->
+  <rect x="290" y="250" width="70" height="18" rx="2" fill="#1D4ED8"/>
+  <rect x="290" y="250" width="50" height="2" rx="1" fill="#BFDBFE"/>
+  
+  <g transform="translate(290, 280)">
+    <rect width="70" height="100" rx="4" fill="#F1F5F9"/>
+    
+    <g transform="translate(10, 10)">
+      <rect width="50" height="8" rx="1" fill="#1E40AF"/>
+      <rect y="15" width="50" height="3" rx="1.5" fill="#CBD5E1"/>
+      <rect width="50" height="3" rx="1.5" fill="#2563EB"/>
+    </g>
+    
+    <g transform="translate(10, 35)">
+      <rect width="50" height="8" rx="1" fill="#1E40AF"/>
+      <rect y="15" width="50" height="3" rx="1.5" fill="#CBD5E1"/>
+      <rect width="35" height="3" rx="1.5" fill="#2563EB"/>
+    </g>
+    
+    <g transform="translate(10, 60)">
+      <rect width="50" height="8" rx="1" fill="#1E40AF"/>
+      <rect y="15" width="50" height="3" rx="1.5" fill="#CBD5E1"/>
+      <rect width="20" height="3" rx="1.5" fill="#2563EB"/>
+    </g>
+  </g>
+  
+  <!-- Footer -->
+  <rect x="0" y="485" width="400" height="15" fill="#F1F5F9"/>
+  <rect x="150" y="490" width="100" height="4" rx="1" fill="#94A3B8"/>
+  
+  <!-- Definitions -->
+  <defs>
+    <linearGradient id="corporateGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1E40AF"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+  </defs>
+</svg>
