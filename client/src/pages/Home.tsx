@@ -208,6 +208,11 @@ const Home = () => {
       cvClone.style.padding = '0';
       cvClone.style.margin = '0';
       cvClone.style.border = 'none';
+      
+      // Aggiungi una classe per indicare che è in corso la generazione del PDF
+      // Utilizzata dai template per adattare il loro stile alla stampa
+      tempContainer.classList.add('pdf-generation-in-progress');
+      
       tempContainer.appendChild(cvClone);
       
       // Genera il canvas dal contenitore temporaneo

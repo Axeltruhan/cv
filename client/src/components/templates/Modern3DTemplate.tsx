@@ -233,29 +233,29 @@ const Modern3DTemplate = ({ personalInfo, experiences, education, skills }: Mode
             </div>
           )}
           
-          {/* Driving Info Section */}
+          {/* Driving Info Section - versione ottimizzata per PDF */}
           {(personalInfo.drivingLicense || personalInfo.hasCar) && (
-            <div className="transform hover:scale-[1.01] transition-transform duration-300">
-              <div className="relative overflow-hidden rounded-xl p-0.5 bg-gradient-to-r from-purple-500 to-indigo-600 shadow-md">
-                <div className="bg-white rounded-lg p-5">
-                  <h2 className="text-xl font-bold text-indigo-700 mb-4 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div style={{ pageBreakInside: "avoid" }}>
+              <div className={`relative rounded-xl ${isPrintMode ? 'border border-indigo-200' : 'border border-indigo-200 bg-white shadow-sm'}`}>
+                <div className="p-4">
+                  <h2 className="text-lg font-bold text-indigo-700 mb-3 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-indigo-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                     </svg>
                     Informazioni di Mobilità
                   </h2>
                   
-                  <div className="space-y-2">
+                  <div className="flex flex-wrap gap-2">
                     {personalInfo.drivingLicense && (
-                      <div className="flex items-center bg-gray-50 p-3 rounded-lg">
-                        <span className="text-sm font-medium text-gray-700 mr-2">Patente di guida:</span>
-                        <span className="text-sm bg-indigo-50 text-indigo-600 px-2 py-1 rounded-lg">{personalInfo.drivingLicense}</span>
+                      <div className="flex items-center bg-gray-50 px-3 py-2 rounded-lg flex-1">
+                        <span className="text-xs font-medium text-gray-700 mr-2">Patente di guida:</span>
+                        <span className="text-xs bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded">{personalInfo.drivingLicense}</span>
                       </div>
                     )}
                     {personalInfo.hasCar && (
-                      <div className="flex items-center bg-gray-50 p-3 rounded-lg">
-                        <span className="text-sm font-medium text-gray-700 mr-2">Automunito:</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                      <div className="flex items-center bg-gray-50 px-3 py-2 rounded-lg flex-1">
+                        <span className="text-xs font-medium text-gray-700 mr-2">Automunito:</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                           <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                         </svg>
                       </div>
