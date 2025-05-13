@@ -4,6 +4,10 @@ import ClassicTemplate from "./templates/ClassicTemplate";
 import ModernTemplate from "./templates/ModernTemplate";
 import ProfessionalTemplate from "./templates/ProfessionalTemplate";
 import Modern3DTemplate from "./templates/Modern3DTemplate";
+import MinimalistTemplate from "./templates/MinimalistTemplate";
+import CreativeTemplate from "./templates/CreativeTemplate";
+import AcademicTemplate from "./templates/AcademicTemplate";
+import TechnicalTemplate from "./templates/TechnicalTemplate";
 
 interface CVPreviewProps {
   personalInfo: PersonalInfo;
@@ -33,6 +37,34 @@ const CVPreview = ({ personalInfo, experiences, education, skills, template = "c
         />;
       case "modern3d":
         return <Modern3DTemplate 
+          personalInfo={personalInfo} 
+          experiences={experiences} 
+          education={education} 
+          skills={skills} 
+        />;
+      case "minimalist":
+        return <MinimalistTemplate 
+          personalInfo={personalInfo} 
+          experiences={experiences} 
+          education={education} 
+          skills={skills} 
+        />;
+      case "creative":
+        return <CreativeTemplate 
+          personalInfo={personalInfo} 
+          experiences={experiences} 
+          education={education} 
+          skills={skills} 
+        />;
+      case "academic":
+        return <AcademicTemplate 
+          personalInfo={personalInfo} 
+          experiences={experiences} 
+          education={education} 
+          skills={skills} 
+        />;
+      case "technical":
+        return <TechnicalTemplate 
           personalInfo={personalInfo} 
           experiences={experiences} 
           education={education} 
