@@ -10,7 +10,7 @@ interface Modern3DTemplateProps {
 
 const Modern3DTemplate = ({ personalInfo, experiences, education, skills }: Modern3DTemplateProps) => {
   return (
-    <div className="bg-gradient-to-tr from-gray-50 to-white p-6 relative shadow-xl rounded-xl" id="cv-preview-modern3d" style={{ width: "100%" }}>
+    <div className="bg-gradient-to-tr from-gray-50 to-white p-4 md:p-6 relative shadow-xl rounded-xl" id="cv-preview-modern3d" style={{ width: "100%", overflow: "hidden" }}>
       {/* Header with 3D effect */}
       <div className="relative mb-8 transform hover:scale-[1.01] transition-transform duration-300 ease-in-out">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl transform rotate-1 scale-[1.02] -z-10 opacity-80 shadow-lg"></div>
@@ -35,7 +35,8 @@ const Modern3DTemplate = ({ personalInfo, experiences, education, skills }: Mode
             {/* Name and title with gradient text */}
             <div className="text-center md:text-left md:flex-1">
               <h1 className="text-3xl md:text-4xl font-extrabold">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-indigo-600">
+                {/* Utilizziamo un testo normale invece di un gradiente per garantire la visibilità */}
+                <span className="text-indigo-700">
                   {personalInfo.firstName || 'Nome'} {personalInfo.lastName || 'Cognome'}
                 </span>
               </h1>
@@ -87,8 +88,8 @@ const Modern3DTemplate = ({ personalInfo, experiences, education, skills }: Mode
         </div>
       )}
       
-      {/* Main content in a 3D card */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Main content in a 3D card - layout adattivo che riduce il numero di colonne su schermi piccoli */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         {/* Left column */}
         <div className="space-y-6">
           {/* Experience Section */}
@@ -106,17 +107,19 @@ const Modern3DTemplate = ({ personalInfo, experiences, education, skills }: Mode
                   <div className="space-y-4">
                     {experiences.map((exp, index) => (
                       <div key={exp.id} className={`${index !== 0 ? 'pt-4 border-t border-gray-100' : ''}`}>
-                        <div className="flex flex-col sm:flex-row justify-between mb-1">
-                          <h3 className="text-lg font-semibold text-gray-800">{exp.position || 'Posizione'}</h3>
-                          <div className="text-sm font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full inline-flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div className="flex flex-col justify-between mb-1">
+                          <h3 className="text-lg font-semibold text-gray-800 truncate">{exp.position || 'Posizione'}</h3>
+                          <div className="text-sm font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full inline-flex items-center self-start mt-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
-                            {formatDate(exp.startDate) || 'Data inizio'} - {exp.current ? 'Presente' : (formatDate(exp.endDate) || 'Data fine')}
+                            <span className="truncate">
+                              {formatDate(exp.startDate) || 'Data inizio'} - {exp.current ? 'Presente' : (formatDate(exp.endDate) || 'Data fine')}
+                            </span>
                           </div>
                         </div>
-                        <p className="text-md font-medium text-gray-700">{exp.company || 'Azienda'}</p>
-                        <p className="text-sm text-gray-600 mt-1">{exp.description || 'Descrizione'}</p>
+                        <p className="text-md font-medium text-gray-700 truncate">{exp.company || 'Azienda'}</p>
+                        <p className="text-sm text-gray-600 mt-1 line-clamp-3">{exp.description || 'Descrizione'}</p>
                       </div>
                     ))}
                   </div>
@@ -140,17 +143,16 @@ const Modern3DTemplate = ({ personalInfo, experiences, education, skills }: Mode
                   
                   <div className="space-y-3">
                     {skills.map((skill) => (
-                      <div key={skill.id}>
-                        <div className="flex justify-between mb-1">
-                          <span className="text-sm font-medium text-gray-700">{skill.name || 'Competenza'}</span>
-                          <span className="text-xs font-medium text-indigo-600">{skill.level}/5</span>
+                      <div key={skill.id} className="overflow-hidden">
+                        <div className="flex justify-between items-center mb-1 flex-wrap">
+                          <span className="text-sm font-medium text-gray-700 truncate pr-2">{skill.name || 'Competenza'}</span>
+                          <span className="text-xs font-medium text-indigo-600 shrink-0">{skill.level}/5</span>
                         </div>
                         <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
                           <div 
                             className="h-full bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full"
                             style={{ 
-                              width: `${(skill.level / 5) * 100}%`,
-                              animation: 'progress 1s ease-out'
+                              width: `${(skill.level / 5) * 100}%`
                             }}
                           ></div>
                         </div>
@@ -182,17 +184,19 @@ const Modern3DTemplate = ({ personalInfo, experiences, education, skills }: Mode
                   <div className="space-y-4">
                     {education.map((edu, index) => (
                       <div key={edu.id} className={`${index !== 0 ? 'pt-4 border-t border-gray-100' : ''}`}>
-                        <div className="flex flex-col sm:flex-row justify-between mb-1">
-                          <h3 className="text-lg font-semibold text-gray-800">{edu.degree || 'Titolo di studio'}</h3>
-                          <div className="text-sm font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full inline-flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div className="flex flex-col justify-between mb-1">
+                          <h3 className="text-lg font-semibold text-gray-800 truncate">{edu.degree || 'Titolo di studio'}</h3>
+                          <div className="text-sm font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full inline-flex items-center self-start mt-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
-                            {formatDate(edu.startDate) || 'Data inizio'} - {edu.current ? 'Presente' : (formatDate(edu.endDate) || 'Data fine')}
+                            <span className="truncate">
+                              {formatDate(edu.startDate) || 'Data inizio'} - {edu.current ? 'Presente' : (formatDate(edu.endDate) || 'Data fine')}
+                            </span>
                           </div>
                         </div>
-                        <p className="text-md font-medium text-gray-700">{edu.institution || 'Istituto'}</p>
-                        <p className="text-sm text-gray-600 mt-1">{edu.description || 'Descrizione'}</p>
+                        <p className="text-md font-medium text-gray-700 truncate">{edu.institution || 'Istituto'}</p>
+                        <p className="text-sm text-gray-600 mt-1 line-clamp-3">{edu.description || 'Descrizione'}</p>
                       </div>
                     ))}
                   </div>
@@ -213,11 +217,11 @@ const Modern3DTemplate = ({ personalInfo, experiences, education, skills }: Mode
                     Lingue Conosciute
                   </h2>
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex flex-col space-y-2">
                     {personalInfo.languages.map((language) => (
-                      <div key={language.id} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-                        <span className="text-sm font-medium text-gray-700">{language.name || 'Lingua'}</span>
-                        <span className="text-xs font-bold px-3 py-1 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg">
+                      <div key={language.id} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg overflow-hidden">
+                        <span className="text-sm font-medium text-gray-700 truncate pr-2">{language.name || 'Lingua'}</span>
+                        <span className="text-xs font-bold px-3 py-1 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg shrink-0">
                           {language.level}
                         </span>
                       </div>

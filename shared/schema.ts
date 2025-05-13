@@ -67,6 +67,7 @@ export const skillSchema = z.object({
   id: z.string(),
   name: z.string(),
   level: z.number().min(1).max(5),
+  category: z.string().optional(),
 });
 
 export const cvSchema = z.object({
