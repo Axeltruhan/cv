@@ -25,9 +25,12 @@ const Home = () => {
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
     firstName: "",
     lastName: "",
+    title: "",
+    summary: "",
     email: "",
     phone: "",
     address: "",
+    location: "",
     description: "",
     photo: "",
     drivingLicense: "",
