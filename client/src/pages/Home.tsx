@@ -337,13 +337,20 @@ const Home = () => {
               Generatore Curriculum Interattivo
             </span>
           </h1>
-          <Button 
-            onClick={downloadCV} 
-            className="btn-3d relative overflow-hidden bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-0 shadow-lg group px-6"
+          <PreviewDownloadDialog
+            personalInfo={personalInfo}
+            experiences={experiences}
+            education={education}
+            skills={skills}
+            template={selectedTemplate}
           >
-            <span className="absolute inset-0 w-full h-full bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></span>
-            <Download className="mr-2 h-4 w-4" /> Scarica CV
-          </Button>
+            <Button 
+              className="btn-3d relative overflow-hidden bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-0 shadow-lg group px-6"
+            >
+              <span className="absolute inset-0 w-full h-full bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></span>
+              <Download className="mr-2 h-4 w-4" /> Anteprima e Download
+            </Button>
+          </PreviewDownloadDialog>
         </div>
       </header>
 
