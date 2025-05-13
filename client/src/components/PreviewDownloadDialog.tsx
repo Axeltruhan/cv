@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PersonalInfo, Experience, Education, Skill } from "@shared/schema";
 import { Slider } from "@/components/ui/slider";
+import { useToast } from "@/hooks/use-toast";
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -35,6 +36,7 @@ const PreviewDownloadDialog = ({
   template,
   children 
 }: PreviewDownloadDialogProps) => {
+  const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
@@ -72,16 +74,21 @@ const PreviewDownloadDialog = ({
   const generatePreview = async () => {
     setIsLoadingPreview(true);
     
-    // Find the CV element in the parent document
-    const cvElement = document.getElementById(`cv-preview-${template}`);
-    
-    if (!cvElement) {
-      console.error("CV element not found");
-      setIsLoadingPreview(false);
-      return;
-    }
-    
     try {
+      // Find the CV element in the parent document
+      // Prima cerchiamo direttamente nel contenitore principale del CV
+      const cvPreviewContainer = document.getElementById('cv-preview');
+      if (!cvPreviewContainer || cvPreviewContainer.children.length === 0) {
+        throw new Error("CV container not found");
+      }
+      
+      // Ottieni il CV template vero e proprio (il primo figlio del container)
+      const cvElement = cvPreviewContainer.children[0] as HTMLElement;
+      
+      if (!cvElement) {
+        throw new Error("CV element not found inside container");
+      }
+      
       // Add a temporary class to set print mode styles
       document.body.classList.add('pdf-generation-in-progress');
       
@@ -91,17 +98,58 @@ const PreviewDownloadDialog = ({
       // Apply any needed style adjustments for PDF generation
       clonedCV.style.width = '210mm'; // A4 width
       
+      // Make sure all backgrounds and images are visible and rendered
+      const allElements = clonedCV.querySelectorAll('*');
+      allElements.forEach(el => {
+        if (el instanceof HTMLElement) {
+          el.style.pageBreakInside = 'avoid';
+          // Ensure all backgrounds are rendered
+          const computed = window.getComputedStyle(el);
+          if (computed.backgroundImage !== 'none' && !el.getAttribute('data-html2canvas-ignore')) {
+            el.setAttribute('data-html2canvas-render-background', 'true');
+          }
+        }
+      });
+      
       // Temporarily add to body for rendering
       clonedCV.style.position = 'absolute';
       clonedCV.style.left = '-9999px';
-      document.body.appendChild(clonedCV);
+      clonedCV.style.top = '0';
+      clonedCV.style.backgroundColor = 'white';
+      clonedCV.style.transition = 'none';
+      
+      const tempContainer = document.createElement('div');
+      tempContainer.appendChild(clonedCV);
+      tempContainer.className = 'pdf-generation-in-progress';
+      tempContainer.style.position = 'fixed';
+      tempContainer.style.left = '-9999px';
+      tempContainer.style.top = '0';
+      tempContainer.style.width = '210mm';
+      tempContainer.style.height = 'auto';
+      tempContainer.style.overflow = 'hidden';
+      tempContainer.style.zIndex = '-9999';
+      document.body.appendChild(tempContainer);
+      
+      // Diamo un momento al browser per renderizzare tutto
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       // Generate canvas from the element
       const canvas = await html2canvas(clonedCV, {
         scale: 2, // Higher quality
         useCORS: true,
         logging: false,
-        allowTaint: true
+        allowTaint: true,
+        backgroundColor: 'white',
+        onclone: (document, element) => {
+          // Force style calculations in cloned document
+          const allElements = element.querySelectorAll('*');
+          allElements.forEach(el => {
+            if (el instanceof HTMLElement) {
+              // Force style calculation
+              window.getComputedStyle(el).backgroundColor;
+            }
+          });
+        }
       });
       
       // Store canvas for later use
@@ -115,13 +163,13 @@ const PreviewDownloadDialog = ({
       
       // Calculate how many pages needed
       const pages = Math.ceil(pageHeight / a4Height);
-      setPageCount(pages);
+      setPageCount(pages || 1);
       
       // Convert canvas to image
       setPreviewImage(canvas.toDataURL('image/png'));
       
       // Clean up
-      document.body.removeChild(clonedCV);
+      document.body.removeChild(tempContainer);
       document.body.classList.remove('pdf-generation-in-progress');
     } catch (error) {
       console.error("Error generating preview:", error);
@@ -132,52 +180,158 @@ const PreviewDownloadDialog = ({
   
   // Detect sections in the CV for repositioning
   const detectSections = () => {
-    const cvElement = document.getElementById(`cv-preview-${template}`);
-    if (!cvElement) return;
+    // Prima cerchiamo l'immagine di anteprima, se è stata generata
+    if (!previewImage || !previewRef.current) return;
     
-    // Find section elements (headings and their containers)
-    const detectedSections: SectionPosition[] = [];
-    
-    // Look for common section identifiers
-    const sectionElements = cvElement.querySelectorAll('h2, h3, section, div[id^="section-"]');
-    
-    sectionElements.forEach((element, index) => {
-      const rect = element.getBoundingClientRect();
-      const cvRect = cvElement.getBoundingClientRect();
+    try {
+      // Cerchiamo i principali contenitori di sezioni nell'anteprima originale
+      const cvPreviewContainer = document.getElementById('cv-preview');
+      if (!cvPreviewContainer || cvPreviewContainer.children.length === 0) return;
       
-      // Skip tiny elements or those without content
-      if (rect.height < 20 || !element.textContent?.trim()) return;
+      // Ottieni il CV template vero e proprio (il primo figlio del container)
+      const cvElement = cvPreviewContainer.children[0] as HTMLElement;
+      if (!cvElement) return;
       
-      // Get section name from text content or data attribute
-      let name = element.textContent?.trim() || `Sezione ${index + 1}`;
+      // Find section elements (headings and their containers) - expand selector to capture more sections
+      const detectedSections: SectionPosition[] = [];
       
-      // Limit name length
-      if (name.length > 30) {
-        name = name.substring(0, 27) + '...';
-      }
+      // Look for common section identifiers - more comprehensive selector
+      const sectionElements = cvElement.querySelectorAll('div > h1, div > h2, div > h3, section, div[class*="section"], div.mb-6, div.mb-8, div.space-y-6 > div, div.space-y-8 > div');
       
-      // Calculate position relative to CV element
-      const top = rect.top - cvRect.top;
-      const left = rect.left - cvRect.left;
+      // Analisi della struttura del documento per identificare possibili contenitori di sezioni
+      const possibleSections: HTMLElement[] = [];
       
-      detectedSections.push({
-        id: `section-${index}`,
-        name,
-        top,
-        left,
-        width: rect.width,
-        height: rect.height,
-        originalTop: top,
-        originalLeft: left
+      // Prima aggiungiamo gli elementi che trovamo con i selettori
+      sectionElements.forEach(el => possibleSections.push(el as HTMLElement));
+      
+      // Cerchiamo anche i contenitori di sezioni in base alla struttura
+      const divs = cvElement.querySelectorAll('div');
+      divs.forEach(div => {
+        // Se il div contiene un h2/h3 ed è abbastanza grande, probabilmente è una sezione
+        const hasHeading = div.querySelector('h1, h2, h3, h4');
+        if (hasHeading && div.clientHeight > 50) {
+          possibleSections.push(div as HTMLElement);
+        }
+        
+        // Se è un div con una classe che contiene "sezione" o simili
+        if (div.className && (
+            div.className.includes('section') || 
+            div.className.includes('sezione') || 
+            div.className.includes('container') ||
+            div.className.includes('mb-') ||
+            div.className.includes('space-y-')
+          )) {
+          possibleSections.push(div as HTMLElement);
+        }
       });
-    });
-    
-    // Only keep unique sections with sufficient size
-    const filteredSections = detectedSections.filter(section => 
-      section.width > 50 && section.height > 20
-    );
-    
-    setSections(filteredSections);
+      
+      // Procediamo con la creazione delle sezioni
+      const uniqueIds = new Set<string>();
+      possibleSections.forEach((element, index) => {
+        const rect = element.getBoundingClientRect();
+        const cvRect = cvElement.getBoundingClientRect();
+        
+        // Skip tiny elements or those without content
+        if (rect.height < 40 || rect.width < 100 || !element.textContent?.trim()) return;
+        
+        // Get section name from text content or data attribute
+        // Prima cerchiamo un titolo all'interno
+        let name = '';
+        const heading = element.querySelector('h1, h2, h3, h4');
+        if (heading && heading.textContent) {
+          name = heading.textContent.trim();
+        } else {
+          // Altrimenti usiamo il testo dell'elemento stesso o un nome generico
+          name = element.textContent?.trim() || `Sezione ${index + 1}`;
+        }
+        
+        // Limita la lunghezza e crea un ID univoco
+        if (name.length > 30) {
+          name = name.substring(0, 27) + '...';
+        }
+        
+        // Solo le prime 3-4 parole per ID
+        const idName = name.split(' ').slice(0, 3).join('-').toLowerCase();
+        let id = `section-${idName}-${index}`;
+        if (uniqueIds.has(id)) {
+          id = `section-${idName}-${index}-${Math.floor(Math.random() * 1000)}`;
+        }
+        uniqueIds.add(id);
+        
+        // Calculate position relative to CV element
+        const top = rect.top - cvRect.top;
+        const left = rect.left - cvRect.left;
+        
+        detectedSections.push({
+          id,
+          name,
+          top,
+          left,
+          width: rect.width,
+          height: rect.height,
+          originalTop: top,
+          originalLeft: left
+        });
+      });
+      
+      // Merge sezioni simili e rimuovi sezioni troppo piccole o troppo grandi
+      const processedSections = detectedSections
+        .filter(section => {
+          // Filtro per dimensioni ragionevoli
+          const isReasonableSize = section.width > 100 && section.height > 40 && 
+                                 section.width < 800 && section.height < 800;
+          return isReasonableSize;
+        })
+        .sort((a, b) => a.top - b.top); // Ordina per posizione dall'alto verso il basso
+      
+      // Riduci potenziali duplicati o sezioni che si sovrappongono
+      const finalSections: SectionPosition[] = [];
+      processedSections.forEach(section => {
+        // Verifica se questa sezione si sovrappone significativamente con una già aggiunta
+        const hasDuplicate = finalSections.some(existing => {
+          // Calcola sovrapposizione verticale
+          const verticalOverlap = Math.min(
+            existing.top + existing.height, 
+            section.top + section.height
+          ) - Math.max(existing.top, section.top);
+          
+          // Calcola sovrapposizione orizzontale
+          const horizontalOverlap = Math.min(
+            existing.left + existing.width, 
+            section.left + section.width
+          ) - Math.max(existing.left, section.left);
+          
+          // Se c'è sovrapposizione significativa in entrambe le direzioni
+          const isSignificantOverlap = 
+            (verticalOverlap > existing.height * 0.7 || verticalOverlap > section.height * 0.7) &&
+            (horizontalOverlap > existing.width * 0.7 || horizontalOverlap > section.width * 0.7);
+          
+          return isSignificantOverlap;
+        });
+        
+        if (!hasDuplicate) {
+          finalSections.push(section);
+        }
+      });
+      
+      // Limita il numero totale di sezioni a massimo 8-10 per non sovraccaricare l'interfaccia
+      const maxSections = 10;
+      const resultSections = finalSections.slice(0, maxSections);
+      
+      setSections(resultSections);
+    } catch (error) {
+      console.error("Error detecting sections:", error);
+      // Fallback a sezioni predefinite per garantire funzionalità minima
+      const fallbackSections: SectionPosition[] = [
+        { id: 'header', name: 'Intestazione', top: 20, left: 20, width: 500, height: 100, originalTop: 20, originalLeft: 20 },
+        { id: 'personal', name: 'Informazioni Personali', top: 130, left: 20, width: 500, height: 150, originalTop: 130, originalLeft: 20 },
+        { id: 'experience', name: 'Esperienze', top: 300, left: 20, width: 500, height: 200, originalTop: 300, originalLeft: 20 },
+        { id: 'education', name: 'Formazione', top: 520, left: 20, width: 500, height: 200, originalTop: 520, originalLeft: 20 },
+        { id: 'skills', name: 'Competenze', top: 740, left: 20, width: 500, height: 150, originalTop: 740, originalLeft: 20 }
+      ];
+      
+      setSections(fallbackSections);
+    }
   };
   
   // Update section position
