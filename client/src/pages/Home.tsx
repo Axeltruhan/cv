@@ -9,6 +9,7 @@ import SkillsForm from "@/components/SkillsForm";
 import LanguagesForm from "@/components/LanguagesForm";
 import DrivingInfoForm from "@/components/DrivingInfoForm";
 import CVPreview from "@/components/CVPreview";
+import PreviewDownloadDialog from "@/components/PreviewDownloadDialog";
 import { useToast } from "@/hooks/use-toast";
 import { PersonalInfo, Experience, Education, Skill, Language } from "@shared/schema";
 import html2canvas from "html2canvas";
