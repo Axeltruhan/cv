@@ -8,6 +8,16 @@ import { useToast } from "@/hooks/use-toast";
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
+// Importa i template
+import ClassicTemplate from '@/components/templates/ClassicTemplate';
+import ModernTemplate from '@/components/templates/ModernTemplate';
+import CreativeTemplate from '@/components/templates/CreativeTemplate';
+import ProfessionalTemplate from '@/components/templates/ProfessionalTemplate';
+import Modern3DTemplate from '@/components/templates/Modern3DTemplate';
+import MinimalistTemplate from '@/components/templates/MinimalistTemplate';
+import AcademicTemplate from '@/components/templates/AcademicTemplate';
+import TechnicalTemplate from '@/components/templates/TechnicalTemplate';
+
 interface PreviewDownloadDialogProps {
   personalInfo: PersonalInfo;
   experiences: Experience[];
@@ -64,12 +74,27 @@ const PreviewDownloadDialog = ({
     }
   }, [open]);
   
-  // Effect to detect sections when preview image is loaded
+  // Valore per tracciare se stiamo mostrando un'anteprima interattiva
+  const [isInteractivePreview, setIsInteractivePreview] = useState(false);
+  
+  // Effect to initialize default sections when dialog is opened
   useEffect(() => {
-    if (previewImage) {
-      detectSections();
+    if (open) {
+      // Inizializza le sezioni predefinite se non sono già presenti
+      if (sections.length === 0) {
+        const defaultSections = [
+          { id: 'header', name: 'Intestazione', top: 20, left: 20, width: 550, height: 100, originalTop: 20, originalLeft: 20 },
+          { id: 'personal', name: 'Profilo', top: 140, left: 20, width: 550, height: 100, originalTop: 140, originalLeft: 20 },
+          { id: 'experience', name: 'Esperienze', top: 260, left: 20, width: 550, height: 200, originalTop: 260, originalLeft: 20 },
+          { id: 'education', name: 'Formazione', top: 480, left: 20, width: 550, height: 150, originalTop: 480, originalLeft: 20 },
+          { id: 'skills', name: 'Competenze', top: 650, left: 20, width: 550, height: 120, originalTop: 650, originalLeft: 20 }
+        ];
+        setSections(defaultSections);
+      }
+      
+      setIsInteractivePreview(true);
     }
-  }, [previewImage]);
+  }, [open]);
   
   // Generate preview image of CV
   const generatePreview = async () => {
@@ -587,75 +612,167 @@ const PreviewDownloadDialog = ({
                 </div>
               </div>
             ) : previewImage ? (
-              <div 
-                className="relative transform origin-top-left transition-transform"
-                style={{ transform: `scale(${zoom})` }}
-              >
-                <img 
-                  src={previewImage} 
-                  alt="Anteprima CV" 
-                  className="max-w-none"
-                />
-                
-                {/* Istruzioni drag-and-drop */}
-                {sections.length > 0 && !selectedSection && (
-                  <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-blue-600/90 text-white px-4 py-2 rounded shadow-lg text-xs text-center z-50 max-w-[300px] pointer-events-none opacity-80">
-                    <div className="font-medium mb-1">Riposiziona le sezioni del CV</div>
-                    <p>Clicca e trascina le sezioni per riposizionarle prima della generazione del PDF</p>
-                  </div>
-                )}
-                
-                {/* Section markers */}
-                {sections.map(section => (
-                  <div
-                    key={section.id}
-                    id={`preview-section-${section.id}`}
-                    className={`absolute border-2 ${
-                      section.isDragging 
-                        ? 'border-blue-600 bg-blue-200/30 shadow-lg' 
-                        : selectedSection === section.id 
-                          ? 'border-blue-500 bg-blue-100/20' 
-                          : 'border-transparent hover:border-blue-300 hover:bg-blue-50/10'
-                    } rounded cursor-move transition-all duration-150`}
+              <div className="relative">
+                <div 
+                  className="relative transform origin-top-left transition-transform"
+                  style={{ transform: `scale(${zoom})` }}
+                  onClick={() => setSelectedSection(null)}
+                >
+                  <img 
+                    src={previewImage} 
+                    alt="Anteprima CV" 
+                    className="max-w-none"
+                  />
+
+                  {/* Sezioni trascinabili */}
+                  <div 
+                    id="preview-section-header"
+                    className={`absolute border-2 ${selectedSection === 'header' ? 'border-blue-500 bg-blue-100/20' : 'border-blue-300 hover:border-blue-500 hover:bg-blue-50/20'} rounded cursor-move transition-all duration-150`}
                     style={{
-                      top: `${section.top}px`,
-                      left: `${section.left}px`,
-                      width: `${section.width}px`,
-                      height: `${section.height}px`,
-                      zIndex: section.isDragging ? 50 : selectedSection === section.id ? 40 : 30
+                      top: '20px',
+                      left: '20px',
+                      width: '550px',
+                      height: '100px',
+                      zIndex: 30
                     }}
-                    onMouseDown={(e) => handleDragStart(e, section.id)}
+                    onMouseDown={(e) => handleDragStart(e, 'header')}
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (!section.isDragging) {
-                        setSelectedSection(section.id === selectedSection ? null : section.id);
-                      }
+                      setSelectedSection('header');
                     }}
                   >
-                    {/* Nome della sezione visibile durante la selezione */}
-                    {(selectedSection === section.id || section.isDragging) && (
-                      <div className="absolute -top-6 left-0 bg-blue-500 text-white text-xs px-2 py-0.5 rounded-t pointer-events-none">
-                        {section.name}
-                      </div>
-                    )}
-                    
-                    {/* Messaggio di feedback per il trascinamento */}
-                    {selectedSection === section.id && !section.isDragging && (
+                    <div className="absolute -top-6 left-0 bg-blue-500 text-white text-xs px-2 py-0.5 rounded-t pointer-events-none">
+                      Intestazione
+                    </div>
+                    {selectedSection === 'header' && (
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div className="bg-blue-600/90 text-white px-3 py-1.5 rounded shadow-md text-xs pointer-events-none">
                           Trascina per spostare
                         </div>
                       </div>
                     )}
-                    
-                    {/* Handle per spostamento */}
-                    <div className="absolute top-1 right-1 w-5 h-5 flex items-center justify-center text-blue-500 opacity-70 hover:opacity-100">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-4 h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-                      </svg>
-                    </div>
                   </div>
-                ))}
+                  
+                  <div 
+                    id="preview-section-personal"
+                    className={`absolute border-2 ${selectedSection === 'personal' ? 'border-blue-500 bg-blue-100/20' : 'border-blue-300 hover:border-blue-500 hover:bg-blue-50/20'} rounded cursor-move transition-all duration-150`}
+                    style={{
+                      top: '140px',
+                      left: '20px',
+                      width: '550px',
+                      height: '100px',
+                      zIndex: 30
+                    }}
+                    onMouseDown={(e) => handleDragStart(e, 'personal')}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedSection('personal');
+                    }}
+                  >
+                    <div className="absolute -top-6 left-0 bg-blue-500 text-white text-xs px-2 py-0.5 rounded-t pointer-events-none">
+                      Profilo
+                    </div>
+                    {selectedSection === 'personal' && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="bg-blue-600/90 text-white px-3 py-1.5 rounded shadow-md text-xs pointer-events-none">
+                          Trascina per spostare
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div 
+                    id="preview-section-experience"
+                    className={`absolute border-2 ${selectedSection === 'experience' ? 'border-blue-500 bg-blue-100/20' : 'border-blue-300 hover:border-blue-500 hover:bg-blue-50/20'} rounded cursor-move transition-all duration-150`}
+                    style={{
+                      top: '260px',
+                      left: '20px',
+                      width: '550px',
+                      height: '200px',
+                      zIndex: 30
+                    }}
+                    onMouseDown={(e) => handleDragStart(e, 'experience')}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedSection('experience');
+                    }}
+                  >
+                    <div className="absolute -top-6 left-0 bg-blue-500 text-white text-xs px-2 py-0.5 rounded-t pointer-events-none">
+                      Esperienze
+                    </div>
+                    {selectedSection === 'experience' && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="bg-blue-600/90 text-white px-3 py-1.5 rounded shadow-md text-xs pointer-events-none">
+                          Trascina per spostare
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div 
+                    id="preview-section-education"
+                    className={`absolute border-2 ${selectedSection === 'education' ? 'border-blue-500 bg-blue-100/20' : 'border-blue-300 hover:border-blue-500 hover:bg-blue-50/20'} rounded cursor-move transition-all duration-150`}
+                    style={{
+                      top: '480px',
+                      left: '20px',
+                      width: '550px',
+                      height: '150px',
+                      zIndex: 30
+                    }}
+                    onMouseDown={(e) => handleDragStart(e, 'education')}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedSection('education');
+                    }}
+                  >
+                    <div className="absolute -top-6 left-0 bg-blue-500 text-white text-xs px-2 py-0.5 rounded-t pointer-events-none">
+                      Formazione
+                    </div>
+                    {selectedSection === 'education' && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="bg-blue-600/90 text-white px-3 py-1.5 rounded shadow-md text-xs pointer-events-none">
+                          Trascina per spostare
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div 
+                    id="preview-section-skills"
+                    className={`absolute border-2 ${selectedSection === 'skills' ? 'border-blue-500 bg-blue-100/20' : 'border-blue-300 hover:border-blue-500 hover:bg-blue-50/20'} rounded cursor-move transition-all duration-150`}
+                    style={{
+                      top: '650px',
+                      left: '20px',
+                      width: '550px',
+                      height: '120px',
+                      zIndex: 30
+                    }}
+                    onMouseDown={(e) => handleDragStart(e, 'skills')}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedSection('skills');
+                    }}
+                  >
+                    <div className="absolute -top-6 left-0 bg-blue-500 text-white text-xs px-2 py-0.5 rounded-t pointer-events-none">
+                      Competenze
+                    </div>
+                    {selectedSection === 'skills' && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="bg-blue-600/90 text-white px-3 py-1.5 rounded shadow-md text-xs pointer-events-none">
+                          Trascina per spostare
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Istruzioni drag-and-drop */}
+                  {!selectedSection && (
+                    <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-blue-600/90 text-white px-4 py-2 rounded shadow-lg text-xs text-center z-50 max-w-[300px] pointer-events-none opacity-90">
+                      <div className="font-medium mb-1">Riposiziona le sezioni del CV</div>
+                      <p>Clicca e trascina le sezioni colorate per riposizionarle prima di generare il PDF</p>
+                    </div>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
