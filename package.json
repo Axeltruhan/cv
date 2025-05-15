@@ -10,6 +10,7 @@
     "check": "tsc",
     "db:push": "drizzle-kit push",
     "postinstall": "npm rebuild vite esbuild"
+    "preinstall": "npm install -g vite",
 
   },
   "dependencies": {
