@@ -1,9 +1,11 @@
 services:
   - type: web
-    name: zip-image-extractor
-    env: python
-    buildCommand: ""
-    startCommand: gunicorn app:app
+    name: interactive-cv-generator
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.10
+      - key: NODE_VERSION
+        value: "20"
+      - key: BUN_INSTALL
+        value: "0"
